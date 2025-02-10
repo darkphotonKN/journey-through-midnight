@@ -1,4 +1,4 @@
 package model
 
-type Game struct {
+type GameInformation struct {
 }
