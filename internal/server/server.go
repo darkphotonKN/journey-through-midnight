@@ -1,9 +1,11 @@
 package server
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
+	"github.com/google/uuid"
 
 	"github.com/gorilla/websocket"
 
@@ -24,11 +26,17 @@ type Server struct {
 	// for upgrading connection to websocket
 	upgrader websocket.Upgrader
 
+	// channel to send client message information to different goroutines
+	serverChan chan ClientPackage
+
 	// players concurrently online
-	playersOnline map[*websocket.Conn]model.Player
+	playersOnline map[uuid.UUID]model.Player
+
+	// player connection to UUID mapping
+	connToPlayerID map[*websocket.Conn]uuid.UUID
 
 	// all current game connections
-	games map[*websocket.Conn]model.GameInformation
+	games map[uuid.UUID]model.GameInformation
 
 	// other
 	mu sync.Mutex
@@ -45,7 +53,26 @@ func NewServer(listenAddr string) *Server {
 	return &Server{
 		listenAddr:    listenAddr,
 		upgrader:      upgrader,
-		playersOnline: make(map[*websocket.Conn]model.Player),
-		games:         make(map[*websocket.Conn]model.GameInformation),
+		serverChan:    make(chan ClientPackage),
+		playersOnline: make(map[uuid.UUID]model.Player),
+		games:         make(map[uuid.UUID]model.GameInformation),
 	}
+}
+
+func (s *Server) findPlayerByConnection(conn *websocket.Conn) (*model.Player, error) {
+	defer func() {
+		s.mu.Lock()
+		s.mu.Unlock()
+	}()
+
+	// find player id via their connection
+	if id, exists := s.connToPlayerID[conn]; exists {
+
+		// find corresponding player
+		if player, ok := s.playersOnline[id]; ok {
+			return &player, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Player with this connection does not exist.")
 }

@@ -1,10 +1,14 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	"net/http"
+
+	"github.com/darkphotonKN/journey-through-midnight/internal/model"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 )
 
 /**
@@ -28,13 +32,18 @@ func (s *Server) HandleMatchConn(c *gin.Context) {
 * Serves each individual connected player.
 **/
 func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
+
 	// removes client and closes connection
 	defer func() {
 		fmt.Println("Connection closed due to end of function.")
 		s.removeClient(conn)
 	}()
 
-	fmt.Printf("Starting listener for user %v\n", s.playersOnline[conn])
+	// find player with this unique connection
+	targetPlayer, _ := s.findPlayerByConnection(conn)
+
+	fmt.Printf("Starting listener for user %v\n", targetPlayer)
+
 	for {
 		_, message, err := conn.ReadMessage()
 
@@ -43,7 +52,9 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 
 			// Unexpected Error
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				fmt.Printf("Abormal error occured with player %v. Closing connection.\n", s.playersOnline[conn])
+
+				fmt.Printf("Abormal error occured with player %v. Closing connection.\n", targetPlayer)
+
 				break
 			}
 
@@ -76,6 +87,56 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 
 		// Send message to MessageHub via an *unbuffered channel* for handling based on type.
 		s.serverChan <- clientPackage
+	}
+}
+
+/**
+* Handles adding clients and creating gameMsgChans for handling connection writes
+* back to the connected client.
+*
+* NOTE: Gorilla Websocket package only allows ONE CONCURRENT WRITER
+* at a time, meaning its best to utilize *unbuffered* channels to prevent
+* a single client from locking the entire server.
+**/
+func (s *Server) setupClientWriter(conn *websocket.Conn) {
+
+	// in the case the channel exists
+	if msgChan := s.getGameMsgChan(conn); msgChan != nil {
+		// concurrently listen to all incoming messages over the channel to write game actions
+		// back to the client
+		go func() {
+			// reading from unbuffered channel to prevent more than one write
+			// a time from ANY single connection
+			for msg := range msgChan {
+				err := conn.WriteJSON(msg)
+				if err != nil {
+					// TODO: remove connection from channel and close
+					s.cleanUpClient(conn)
+					break
+				}
+			}
+		}()
+	}
+}
+
+/**
+* Adds a player from a list of client connections.
+**/
+
+func (s *Server) addClient(conn *websocket.Conn) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// create a new uuid to represent the player's online connection
+	newUuid, err := uuid.NewUUID()
+
+	if err != nil {
+		fmt.Printf("Error when creating new uuid to store player: %s\n Player NOT stored.\n")
+	}
+
+	s.playersOnline[newUuid] = model.Player{
+		ID:   newUuid,
+		Conn: conn,
 	}
 }
 
