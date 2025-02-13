@@ -13,7 +13,7 @@ func (s *Server) MessageHub() {
 	fmt.Println("Starting Message Hub")
 
 	for {
-		fmt.Printf("Current client connections in session: %+v\n\n", s.clientConns)
+		fmt.Printf("Current client connections in session: %+v\n\n", s.playersOnline)
 
 		select {
 		case clientPackage := <-s.serverChan:
@@ -34,7 +34,7 @@ func (s *Server) MessageHub() {
 				fmt.Println("Inside 'find match' case, payload:", clientPackage.GameMessage.Payload)
 
 				// assert Payload type specific to gameMessage.Action == "find_match", which is Player
-				player, ok := clientPackage.GameMessage.Payload.(model.Player)
+				player, ok := clientPackage.GameMessage.Payload.(model.PlayerRequest)
 
 				if !ok {
 					fmt.Printf("Error attempting to assert player from payload.\n")

@@ -120,40 +120,38 @@ func (s *Server) setupClientWriter(conn *websocket.Conn) {
 }
 
 /**
-* Adds a player from a list of client connections.
+* Adds a player to a list of online players via their unique connection.
 **/
 
-func (s *Server) addClient(conn *websocket.Conn) {
+func (s *Server) addClient(conn *websocket.Conn, playerRequest model.PlayerRequest) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	// create a new uuid to represent the player's online connection
-	newUuid, err := uuid.NewUUID()
-
-	if err != nil {
-		fmt.Printf("Error when creating new uuid to store player: %s\n Player NOT stored.\n")
-	}
-
-	s.playersOnline[newUuid] = model.Player{
-		ID:   newUuid,
-		Conn: conn,
+	s.playersOnline[playerRequest.ID] = model.Player{
+		ID:       playerRequest.ID,
+		UserName: playerRequest.UserName,
+		Conn:     conn,
 	}
 }
 
 /**
-* Removes a player from the list of client connections.
+* Removes a player from the list of online players via their unique connection.
 **/
 func (s *Server) removeClient(conn *websocket.Conn) {
 	// lock and unlock to prevent race conditions
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if player, ok := s.playersOnline[conn]; ok {
-		conn.Close()
+	// find corresponding player based on their connection
+	player, err := s.findPlayerByConnection(conn)
 
-		fmt.Println("Player removed from server:", player)
-
-		// remove from list of connections
-		delete(s.playersOnline, conn)
+	if err != nil {
+		fmt.Printf("Error when attempting to find player with connection %s\n", err)
+		return
 	}
+
+	// remove from list of connections
+	delete(s.playersOnline, player.ID)
+
+	fmt.Println("Player removed from server:", player)
 }

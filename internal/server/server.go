@@ -60,10 +60,8 @@ func NewServer(listenAddr string) *Server {
 }
 
 func (s *Server) findPlayerByConnection(conn *websocket.Conn) (*model.Player, error) {
-	defer func() {
-		s.mu.Lock()
-		s.mu.Unlock()
-	}()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// find player id via their connection
 	if id, exists := s.connToPlayerID[conn]; exists {

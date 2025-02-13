@@ -10,3 +10,8 @@ type Player struct {
 	UserName string
 	Conn     *websocket.Conn
 }
+
+type PlayerRequest struct {
+	ID       uuid.UUID `json:"id"`
+	UserName string    `json:"username"`
+}
