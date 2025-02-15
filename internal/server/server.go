@@ -38,6 +38,9 @@ type Server struct {
 	// all current game connections
 	games map[uuid.UUID]model.GameInformation
 
+	// stores unique ws connections for writing back to each client
+	gameMsgChan map[*websocket.Conn]chan GameMessage
+
 	// other
 	mu sync.Mutex
 }

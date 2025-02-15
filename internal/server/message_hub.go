@@ -45,7 +45,7 @@ func (s *Server) MessageHub() {
 				// add client to global struct connections pool
 				s.addClient(clientPackage.Conn, player)
 
-				// TODO initiating matchmaking for the player concurrently
+				// TODO: initiate matchmaking for the player concurrently
 			}
 		}
 	}

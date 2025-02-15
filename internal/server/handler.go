@@ -92,14 +92,39 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 }
 
 /**
+* Creates the unique game message channel for a specific connection for writing back
+* from server to client.
+**/
+func (s *Server) createGameMsgChan(conn *websocket.Conn) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.gameMsgChan[conn] = make(chan GameMessage)
+}
+
+/**
+* Gets the unique game message channel for a specific connection for writing back
+* from server to client, validating that it exists.
+**/
+func (s *Server) createGameMsgChan(conn *websocket.Conn) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.gameMsgChan[conn] = make(chan GameMessage)
+}
+
+/**
 * Handles adding clients and creating gameMsgChans for handling connection writes
 * back to the connected client.
 *
 * NOTE: Gorilla Websocket package only allows ONE CONCURRENT WRITER
 * at a time, meaning its best to utilize *unbuffered* channels to prevent
-* a single client from locking the entire server.
+* a single client from locking the entire server, and prevent race conditions
+* where multiple writes to the same connection.
 **/
 func (s *Server) setupClientWriter(conn *websocket.Conn) {
+	// sets up this connection's personal game message channel
+	s.createGameMsgChan(conn)
 
 	// in the case the channel exists
 	if msgChan := s.getGameMsgChan(conn); msgChan != nil {
