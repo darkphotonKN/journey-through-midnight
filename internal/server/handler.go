@@ -7,7 +7,6 @@ import (
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -39,17 +38,16 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 		s.removeClient(conn)
 	}()
 
-	// find player with this unique connection
-	targetPlayer, _ := s.findPlayerByConnection(conn)
-
-	fmt.Printf("Starting listener for user %v\n", targetPlayer)
-
 	for {
 		_, message, err := conn.ReadMessage()
 
-		if err != nil {
-			// --- clean up connection ---
+		// find player with this unique connection
+		targetPlayer, _ := s.findPlayerByConnection(conn)
 
+		fmt.Printf("Starting listener for user %v\n", targetPlayer)
+
+		// --- clean up connection ---
+		if err != nil {
 			// Unexpected Error
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 
@@ -69,6 +67,9 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 			break
 		}
 
+		// --- Client Connection Handling ---
+		// Decodes Incoming client message and serves their unique connection its own goroutine
+
 		// decode message to pre-defined json structure "GameMessage"
 		var decodedMsg GameMessage
 
@@ -85,7 +86,7 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 
 		clientPackage := ClientPackage{GameMessage: decodedMsg, Conn: conn}
 
-		// Send message to MessageHub via an *unbuffered channel* for handling based on type.
+		// Send message to MessageHub via an *unbuffered channel* for handling based on the type field.
 		s.serverChan <- clientPackage
 	}
 }
@@ -122,7 +123,6 @@ func (s *Server) setupClientWriter(conn *websocket.Conn) {
 /**
 * Adds a player to a list of online players via their unique connection.
 **/
-
 func (s *Server) addClient(conn *websocket.Conn, playerRequest model.PlayerRequest) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
