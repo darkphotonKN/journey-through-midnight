@@ -21,7 +21,7 @@ type ClientPackage struct {
 // Core Server Type
 type Server struct {
 	// address to connect to the server
-	listenAddr string
+	ListenAddr string
 
 	// for upgrading connection to websocket
 	upgrader websocket.Upgrader
@@ -54,7 +54,7 @@ func NewServer(listenAddr string) *Server {
 	}
 
 	return &Server{
-		listenAddr:    listenAddr,
+		ListenAddr:    listenAddr,
 		upgrader:      upgrader,
 		serverChan:    make(chan ClientPackage),
 		playersOnline: make(map[uuid.UUID]model.Player),

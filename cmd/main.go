@@ -27,4 +27,14 @@ func main() {
 	// concurrently init messagehub listen-response loop
 	go server.MessageHub()
 
+	// routes setup
+	routes := config.SetupRoutes(server)
+
+	fmt.Printf("Server listening on port %s.\n", port)
+
+	err := routes.Run(server.ListenAddr)
+
+	if err != nil {
+		log.Panic("Unable to start server. Err:", err)
+	}
 }

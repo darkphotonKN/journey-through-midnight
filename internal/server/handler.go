@@ -106,11 +106,17 @@ func (s *Server) createGameMsgChan(conn *websocket.Conn) {
 * Gets the unique game message channel for a specific connection for writing back
 * from server to client, validating that it exists.
 **/
-func (s *Server) createGameMsgChan(conn *websocket.Conn) {
+func (s *Server) getGameMsgChan(conn *websocket.Conn) (chan GameMessage, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.gameMsgChan[conn] = make(chan GameMessage)
+	channel, exists := s.gameMsgChan[conn]
+
+	if !exists {
+		return nil, fmt.Errorf("Game message channel for this connection oes not exist.")
+	}
+
+	return channel, nil
 }
 
 /**
@@ -127,22 +133,30 @@ func (s *Server) setupClientWriter(conn *websocket.Conn) {
 	s.createGameMsgChan(conn)
 
 	// in the case the channel exists
-	if msgChan := s.getGameMsgChan(conn); msgChan != nil {
-		// concurrently listen to all incoming messages over the channel to write game actions
-		// back to the client
-		go func() {
-			// reading from unbuffered channel to prevent more than one write
-			// a time from ANY single connection
-			for msg := range msgChan {
-				err := conn.WriteJSON(msg)
-				if err != nil {
-					// TODO: remove connection from channel and close
-					s.cleanUpClient(conn)
-					break
-				}
-			}
-		}()
+	msgChan, err := s.getGameMsgChan(conn)
+
+	if err != nil {
+		fmt.Println(err)
+		s.cleanUpClient(conn)
+		return
 	}
+
+	// concurrently listen to all incoming messages over the channel to write game actions
+	// back to the client
+	go func() {
+		// reading from unbuffered channel to prevent more than one write
+		// a time from ANY single connection
+		for msg := range msgChan {
+			err := conn.WriteJSON(msg)
+
+			if err != nil {
+				// TODO: remove connection from channel and close
+				s.cleanUpClient(conn)
+				break
+			}
+		}
+	}()
+
 }
 
 /**
@@ -179,4 +193,22 @@ func (s *Server) removeClient(conn *websocket.Conn) {
 	delete(s.playersOnline, player.ID)
 
 	fmt.Println("Player removed from server:", player)
+}
+
+/**
+* Cleans up the client connected to the online server from all relevant data structures.
+**/
+func (s *Server) cleanUpClient(conn *websocket.Conn) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// removes client from players online
+	s.removeClient(conn)
+
+	// close their channel
+	channel, _ := s.getGameMsgChan(conn)
+	close(channel)
+
+	// removes their personal gameMsgChan
+	delete(s.gameMsgChan, conn)
 }
