@@ -39,10 +39,19 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 	}()
 
 	for {
+		fmt.Println("Listening for user messages...")
 		_, message, err := conn.ReadMessage()
 
+		fmt.Printf("\nMessage received from connected user: %s\n\n", string(message))
+
 		// find player with this unique connection
-		targetPlayer, _ := s.findPlayerByConnection(conn)
+		targetPlayer, playerErr := s.findPlayerByConnection(conn)
+
+		if playerErr == nil {
+			fmt.Printf("Message from registered player: %v\n", targetPlayer)
+		} else {
+			fmt.Println("Message from unregistered connection (normal for first messages), error:", playerErr)
+		}
 
 		fmt.Printf("Starting listener for user %v\n", targetPlayer)
 
@@ -113,7 +122,7 @@ func (s *Server) getGameMsgChan(conn *websocket.Conn) (chan GameMessage, error) 
 	channel, exists := s.gameMsgChan[conn]
 
 	if !exists {
-		return nil, fmt.Errorf("Game message channel for this connection oes not exist.")
+		return nil, fmt.Errorf("Game message channel for this connection does not exist.")
 	}
 
 	return channel, nil

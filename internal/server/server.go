@@ -53,11 +53,13 @@ func NewServer(listenAddr string) *Server {
 	}
 
 	return &Server{
-		ListenAddr:    listenAddr,
-		upgrader:      upgrader,
-		serverChan:    make(chan ClientPackage),
-		playersOnline: make(map[uuid.UUID]model.Player),
-		games:         make(map[uuid.UUID]model.GameInformation),
+		ListenAddr:     listenAddr,
+		upgrader:       upgrader,
+		serverChan:     make(chan ClientPackage),
+		playersOnline:  make(map[uuid.UUID]model.Player),
+		games:          make(map[uuid.UUID]model.GameInformation),
+		connToPlayerID: make(map[*websocket.Conn]uuid.UUID),
+		gameMsgChan:    make(map[*websocket.Conn]chan GameMessage),
 	}
 }
 
