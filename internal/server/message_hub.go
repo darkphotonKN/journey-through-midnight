@@ -25,7 +25,7 @@ func (s *Server) MessageHub() {
 
 			if err != nil {
 				fmt.Printf("Error occured when attempting to parse payload: %s\n", err)
-				clientPackage.Conn.WriteJSON("Error attempting to parse payload.")
+				clientPackage.Conn.WriteJSON(fmt.Sprintf("Error attempting to parse payload: %s", err))
 				continue
 			}
 
@@ -46,6 +46,10 @@ func (s *Server) MessageHub() {
 				s.addClient(clientPackage.Conn, player)
 
 				// TODO: initiate matchmaking for the player concurrently
+
+			// TODO: Move this to its own instance or implement a way to validate game instance
+			case match_error:
+
 			}
 
 		}
