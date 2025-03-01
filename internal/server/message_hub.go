@@ -47,6 +47,7 @@ func (s *Server) MessageHub() {
 
 				// TODO: initiate matchmaking for the player concurrently
 			}
+
 		}
 	}
 }

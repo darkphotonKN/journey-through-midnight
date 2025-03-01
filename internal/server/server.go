@@ -20,11 +20,6 @@ type ClientPackage struct {
 
 // Core Server Type
 type Server struct {
-	// address to connect to the server
-	ListenAddr string
-
-	// for upgrading connection to websocket
-	upgrader websocket.Upgrader
 
 	// channel to send client message information to different goroutines
 	serverChan chan ClientPackage
@@ -43,6 +38,10 @@ type Server struct {
 
 	// other
 	mu sync.Mutex
+
+	ListenAddr string
+
+	upgrader websocket.Upgrader
 }
 
 func NewServer(listenAddr string) *Server {
