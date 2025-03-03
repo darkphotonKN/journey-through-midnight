@@ -12,15 +12,25 @@ type Time struct {
 type HeroClassName string
 
 const (
-	knight  HeroClassName = "knight"
-	wizard  HeroClassName = "wizard"
-	hunter  HeroClassName = "Hunter"
-	monk    HeroClassName = "Monk"
+	fighter HeroClassName = "Fighter"
+	wizard  HeroClassName = "Wizard"
+	rogue   HeroClassName = "Rogue"
 	priest  HeroClassName = "Priest"
 	duelist HeroClassName = "Duelist"
+	templar HeroClassName = "Templar"
 )
 
 type HeroClass struct {
+}
+
+type Attributes struct {
+	strength     int
+	intelligence int
+	wisdom       int
+	agility      int
+	vitality     int
+	faith        int
+	charisma     int
 }
 
 type Item struct {
@@ -28,13 +38,29 @@ type Item struct {
 	name string
 }
 
-type Items []Item
+type Skill struct {
+	id   uuid.UUID
+	name string
+}
 
 type PlayerState struct {
 	Player
 	// the stage the game match has reached for any player
-	time  map[uuid.UUID]Time
-	class HeroClass
+	time map[uuid.UUID]Time
+
+	// hero stuff
+	heroInfo Hero
+}
+
+type Hero struct {
+	class      HeroClass  // mage
+	attributes Attributes //
+	skills     []Skill
+	items      []Item
+}
+
+type Follower struct {
+	heroInfo Hero
 }
 
 /**
