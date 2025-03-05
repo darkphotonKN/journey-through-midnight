@@ -24,7 +24,12 @@ const (
 	find_match  Action = "find_match"
 	init_match  Action = "init_match"
 	match_error Action = "match_error"
-	choice      Action = "choice"
+
+	// --- event actions ---
+
+	// -- shop event --
+	buy_item   Action = "buy_item"
+	leave_shop Action = "leave_shop"
 )
 
 /**

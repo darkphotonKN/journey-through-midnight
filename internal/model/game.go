@@ -43,20 +43,23 @@ type Skill struct {
 	name string
 }
 
+/**
+* Holds all primary information about a player.
+**/
 type PlayerState struct {
 	Player
-	// the stage the game match has reached for any player
-	time map[uuid.UUID]Time
-
-	// hero stuff
-	heroInfo Hero
+	// the stage the game match has reached for any player time Time
+	heroInfo  Hero        // hero information
+	party     interface{} // TODO: update to include followers
+	inventory []Item      // global items
+	gold      int
 }
 
 type Hero struct {
 	class      HeroClass  // mage
 	attributes Attributes //
 	skills     []Skill
-	items      []Item
+	items      []Item // items specifically meant for a hero
 }
 
 type Follower struct {
@@ -70,6 +73,7 @@ type GameInformation struct {
 	MsgChan *GameMsgChan // message channel to communicate with game
 
 	// --- metadata ---
+	round int // also represents "day"
 
 	// players in this game instance
 	players map[uuid.UUID]PlayerState
