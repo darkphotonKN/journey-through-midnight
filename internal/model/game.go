@@ -2,6 +2,19 @@ package model
 
 import "github.com/google/uuid"
 
+/**
+* Holds all the information for a specific game's meta data.
+**/
+type Game struct {
+	MsgChan *GameMsgChan // message channel to communicate with game
+
+	// --- metadata ---
+	round int // also represents "day"
+
+	// players in this game instance
+	players map[uuid.UUID]PlayerState
+}
+
 type GameMsgChan = chan string
 
 type Time struct {
@@ -64,17 +77,4 @@ type Hero struct {
 
 type Follower struct {
 	heroInfo Hero
-}
-
-/**
-* Holds all the information for a specific game's meta data.
-**/
-type GameInformation struct {
-	MsgChan *GameMsgChan // message channel to communicate with game
-
-	// --- metadata ---
-	round int // also represents "day"
-
-	// players in this game instance
-	players map[uuid.UUID]PlayerState
 }

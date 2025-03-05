@@ -39,7 +39,6 @@ func (gm *GameMessage) ParsePayload() error {
 	switch gm.Action {
 	case find_match:
 
-		// assume payload is Player
 		payloadMap, ok := gm.Payload.(map[string]interface{})
 		if !ok {
 			fmt.Println("Payload is not of type map[string]interface{}")
@@ -67,12 +66,12 @@ func (gm *GameMessage) ParsePayload() error {
 			return fmt.Errorf("Could not parse id into a UUID.")
 		}
 
-		convertedPlayer := model.Player{
+		convertedPlayer := model.PlayerRequest{
 			ID:       idUUID,
 			UserName: name,
 		}
 
-		fmt.Println("Converted player:", convertedPlayer)
+		fmt.Printf("Converted player: %+v\n", convertedPlayer)
 
 		gm.Payload = convertedPlayer
 

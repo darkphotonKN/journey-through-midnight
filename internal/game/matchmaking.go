@@ -9,7 +9,7 @@ import (
 
 type MatchMaker interface {
 	InitiateMatchMaking(*model.Player) error
-	TryCreateMatch() (bool, uuid.UUID, model.GameInformation)
+	TryCreateMatch() (bool, uuid.UUID, model.Game)
 }
 
 type BaseMatchMaker struct {
@@ -40,7 +40,7 @@ func (m *BaseMatchMaker) InitiateMatchMaking(player *model.Player) error {
 /**
 * Attempts to create a match with currently queued players.
 **/
-func (m *BaseMatchMaker) TryCreateMatch() (bool, uuid.UUID, model.GameInformation) {
+func (m *BaseMatchMaker) TryCreateMatch() (bool, uuid.UUID, model.Game) {
 
-	return false, uuid.New(), model.GameInformation{}
+	return false, uuid.New(), model.Game{}
 }

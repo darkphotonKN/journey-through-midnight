@@ -23,7 +23,9 @@ func (s *Server) MessageHub() {
 			player, err := s.findPlayerByConnection(clientPackage.Conn)
 
 			if err != nil {
-				return
+				fmt.Println("Player hasn't joined in any game yet.")
+			} else {
+				fmt.Println("Player %+v sending action.\n", player)
 			}
 
 			// NOTE: parses payload to a specific type based on the action type

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/darkphotonKN/journey-through-midnight/internal/game"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
 	"github.com/google/uuid"
 
@@ -31,10 +32,13 @@ type Server struct {
 	connToPlayerID map[*websocket.Conn]uuid.UUID
 
 	// all current game connections
-	games map[uuid.UUID]model.GameInformation
+	games map[uuid.UUID]model.Game
 
 	// stores unique ws connections for writing back to each client
 	gameMsgChan map[*websocket.Conn]chan GameMessage
+
+	// allows launching a game and matchmaking
+	matchMaker game.MatchMaker
 
 	// other
 	mu sync.Mutex
@@ -52,14 +56,18 @@ func NewServer(listenAddr string) *Server {
 		},
 	}
 
+	// instantiate a matchmaker
+	matchMaker := game.NewMatchMaker()
+
 	return &Server{
 		ListenAddr:     listenAddr,
 		upgrader:       upgrader,
 		serverChan:     make(chan ClientPackage),
 		playersOnline:  make(map[uuid.UUID]model.Player),
-		games:          make(map[uuid.UUID]model.GameInformation),
+		games:          make(map[uuid.UUID]model.Game),
 		connToPlayerID: make(map[*websocket.Conn]uuid.UUID),
 		gameMsgChan:    make(map[*websocket.Conn]chan GameMessage),
+		matchMaker:     matchMaker,
 	}
 }
 
