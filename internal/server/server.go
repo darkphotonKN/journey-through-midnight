@@ -72,7 +72,7 @@ func NewServer(listenAddr string) *Server {
 	}
 
 	// start matchmaking goroutine
-	newServer.matchMaker.StartMatchMaking(time.Second * 5)
+	newServer.matchMaker.StartMatchMaking(time.Second * 20)
 
 	return newServer
 }

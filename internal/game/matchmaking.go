@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
@@ -17,6 +18,9 @@ type MatchMaker interface {
 type BaseMatchMaker struct {
 	// players in queue
 	queue []*model.Player
+
+	// matchmaker's own mutex
+	mu sync.Mutex
 }
 
 func NewMatchMaker() MatchMaker {
@@ -73,24 +77,63 @@ func (m *BaseMatchMaker) StartMatchMaking(interval time.Duration) {
 
 func (m *BaseMatchMaker) matchMake() {
 
+	// NOTE: only debug logging
+	var playersInQueue []model.Player
+	for _, player := range m.queue {
+		playersInQueue = append(playersInQueue, *player)
+	}
+	fmt.Printf("\nInitial queue: %+v\n\n", playersInQueue)
+	// NOTE: debug logging end
+
 	if len(m.queue) < 2 {
-		fmt.Printf("Not enough players in queue, waiting on players...\n")
+		fmt.Printf("\nNot enough players in queue, waiting on players...\n\n")
 		return
 	}
 
 	// check queue and take first 2 players into the match
 	playerOne := m.queue[0]
-	playerTwo := m.queue[0]
+	playerTwo := m.queue[1]
 
 	if playerOne == nil || playerTwo == nil {
 		fmt.Printf("Error when matchmaking, required players don't exist in the queue\n")
 		return
 	}
 
-	// creates game with these players
+	// TODO: creates game with these players
+	fmt.Printf("\nplayer one: %s, player two: %s\n\n", playerOne.UserName, playerTwo.UserName)
 
 	// remove them from queue
-	m.queue = m.queue[2:]
+	m.removePlayerFromQueue(playerOne.ID)
+	m.removePlayerFromQueue(playerTwo.ID)
 
-	fmt.Printf("\nRemaining queue:\n\n", m.queue)
+	// NOTE: only debug logging
+	playersInQueue = []model.Player{}
+	for _, player := range m.queue {
+		playersInQueue = append(playersInQueue, *player)
+	}
+	fmt.Printf("\nRemaining queue: %+v\n\n", playersInQueue)
+	// NOTE: debug logging end
+}
+
+/**
+* Removes players from the queue.
+**/
+func (m *BaseMatchMaker) removePlayerFromQueue(id uuid.UUID) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	var updatedQueue []*model.Player
+
+	for _, player := range m.queue {
+		// skip removed player
+		if player.ID != id {
+			continue
+		}
+
+		updatedQueue = append(updatedQueue)
+	}
+
+	// update queue
+
+	m.queue = updatedQueue
 }
