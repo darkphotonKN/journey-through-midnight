@@ -1,17 +1,22 @@
 package game
 
 import (
+	"fmt"
+	"testing"
 	"time"
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestMatchMaker_MatchMake() {
+func TestMatchMaker_MatchMake(t *testing.T) {
+
+	matchWaitTime := time.Second * 5
 
 	matchMaker := NewMatchMaker()
 
-	matchMaker.StartMatchMaking(time.Second * 5)
+	matchMaker.StartMatchMaking(matchWaitTime)
 
 	playerOneUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111111")
 	playerTwoUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111112")
@@ -37,7 +42,23 @@ func TestMatchMaker_MatchMake() {
 	matchMaker.JoinMatchMaking(&playerTwo)
 	matchMaker.JoinMatchMaking(&playerThree)
 
-	// assert for only 1 player left after 1 second
+	queue := matchMaker.GetQueueForTesting()
+
+	fmt.Printf("\ncurrent queue: %+v\n\n", queue)
+
+	// test for length of initial queue
+	assert.Len(t, queue, 3)
+
+	// assert for only 1 player left after wait time
+	waitTimeOffset := time.Millisecond * 100
+	timer := time.NewTicker(matchWaitTime + waitTimeOffset)
+
+	select {
+	case <-timer.C:
+		queue = matchMaker.GetQueueForTesting()
+
+		assert.Len(t, queue, 2)
+	}
 
 	// TODO: assert for players 1 and 2 not in queue
 }

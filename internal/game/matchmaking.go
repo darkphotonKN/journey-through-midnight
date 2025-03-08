@@ -13,6 +13,7 @@ type MatchMaker interface {
 	JoinMatchMaking(*model.Player) error
 	StartMatchMaking(interval time.Duration)
 	TryCreateMatch() (bool, uuid.UUID, model.Game)
+	GetQueueForTesting() []*model.Player
 }
 
 type BaseMatchMaker struct {
@@ -136,4 +137,9 @@ func (m *BaseMatchMaker) removePlayerFromQueue(id uuid.UUID) {
 	// update queue
 
 	m.queue = updatedQueue
+}
+
+// --- NOTE: METHODS ONLY FOR TESTING ---
+func (m *BaseMatchMaker) GetQueueForTesting() []*model.Player {
+	return m.queue
 }
