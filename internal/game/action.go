@@ -22,7 +22,12 @@ const (
 	Shop           EventType = "shop"
 )
 
+/**
+* Initiates a random event, waits for player choices, and outputs the results.
+**/
+// TODO: initiate a random event and play out the results
 func (e *GameEvent) initiateEvent(eventType EventType) *model.PlayerState {
+	return &model.PlayerState{}
 }
 
 /**

@@ -56,7 +56,7 @@ func (s *Server) MessageHub() {
 
 				// TODO: initiate matchmaking for the player concurrently,
 				// right now it's only adding the player to the current online players in a match.
-				s.matchMaker.InitiateMatchMaking(&model.Player{
+				s.matchMaker.JoinMatchMaking(&model.Player{
 					ID:       player.ID,
 					UserName: player.UserName,
 					Conn:     clientPackage.Conn,

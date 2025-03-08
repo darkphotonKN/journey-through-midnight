@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/game"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
@@ -59,7 +60,7 @@ func NewServer(listenAddr string) *Server {
 	// instantiate a new matchmaker
 	matchMaker := game.NewMatchMaker()
 
-	return &Server{
+	newServer := &Server{
 		ListenAddr:     listenAddr,
 		upgrader:       upgrader,
 		serverChan:     make(chan ClientPackage),
@@ -69,6 +70,11 @@ func NewServer(listenAddr string) *Server {
 		gameMsgChan:    make(map[*websocket.Conn]chan GameMessage),
 		matchMaker:     matchMaker,
 	}
+
+	// start matchmaking goroutine
+	newServer.matchMaker.StartMatchMaking(time.Second * 5)
+
+	return newServer
 }
 
 func (s *Server) findPlayerByConnection(conn *websocket.Conn) (*model.Player, error) {
