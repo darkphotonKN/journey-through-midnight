@@ -56,7 +56,7 @@ func NewServer(listenAddr string) *Server {
 		},
 	}
 
-	// instantiate a matchmaker
+	// instantiate a new matchmaker
 	matchMaker := game.NewMatchMaker()
 
 	return &Server{

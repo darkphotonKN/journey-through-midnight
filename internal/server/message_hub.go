@@ -56,6 +56,11 @@ func (s *Server) MessageHub() {
 
 				// TODO: initiate matchmaking for the player concurrently,
 				// right now it's only adding the player to the current online players in a match.
+				s.matchMaker.InitiateMatchMaking(&model.Player{
+					ID:       player.ID,
+					UserName: player.UserName,
+					Conn:     clientPackage.Conn,
+				})
 
 			case buy_item:
 				fmt.Println("Player %s is attempting to buy an item.\n", clientPackage)
