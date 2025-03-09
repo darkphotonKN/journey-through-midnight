@@ -77,7 +77,6 @@ func (m *BaseMatchMaker) StartMatchMaking(interval time.Duration) {
 **/
 
 func (m *BaseMatchMaker) matchMake() {
-
 	// NOTE: only debug logging
 	var playersInQueue []model.Player
 	for _, player := range m.queue {
@@ -127,11 +126,12 @@ func (m *BaseMatchMaker) removePlayerFromQueue(id uuid.UUID) {
 
 	for _, player := range m.queue {
 		// skip removed player
-		if player.ID != id {
+		if player.ID == id {
 			continue
 		}
 
-		updatedQueue = append(updatedQueue)
+		fmt.Println("Adding back player:", player)
+		updatedQueue = append(updatedQueue, player)
 	}
 
 	// update queue

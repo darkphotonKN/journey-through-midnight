@@ -25,7 +25,7 @@ func (s *Server) MessageHub() {
 			if err != nil {
 				fmt.Println("Player hasn't joined in any game yet.")
 			} else {
-				fmt.Println("Player %+v sending action.\n", player)
+				fmt.Printf("Player %+v sending action.\n", player)
 			}
 
 			// NOTE: parses payload to a specific type based on the action type
@@ -63,7 +63,7 @@ func (s *Server) MessageHub() {
 				})
 
 			case buy_item:
-				fmt.Println("Player %s is attempting to buy an item.\n", clientPackage)
+				fmt.Printf("Player %+v is attempting to buy an item.\n", clientPackage)
 
 			// TODO: Move this to its own instance or implement a way to validate game instance
 			case match_error:

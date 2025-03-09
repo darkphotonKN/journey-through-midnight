@@ -12,7 +12,7 @@ import (
 
 func TestMatchMaker_MatchMake(t *testing.T) {
 
-	matchWaitTime := time.Second * 5
+	matchWaitTime := time.Second * 3
 
 	matchMaker := NewMatchMaker()
 
@@ -57,7 +57,7 @@ func TestMatchMaker_MatchMake(t *testing.T) {
 	case <-timer.C:
 		queue = matchMaker.GetQueueForTesting()
 
-		assert.Len(t, queue, 2)
+		assert.Len(t, queue, 1)
 	}
 
 	// TODO: assert for players 1 and 2 not in queue
