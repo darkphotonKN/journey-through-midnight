@@ -122,21 +122,23 @@ func (m *BaseMatchMaker) removePlayerFromQueue(id uuid.UUID) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	var updatedQueue []*model.Player
+	for index, player := range m.queue {
 
-	for _, player := range m.queue {
-		// skip removed player
 		if player.ID == id {
-			continue
+			m.removeByIndex(index)
 		}
-
-		fmt.Println("Adding back player:", player)
-		updatedQueue = append(updatedQueue, player)
 	}
+}
 
-	// update queue
+/**
+* Remove player from queue by index (memory efficient version)
+**/
+func (m *BaseMatchMaker) removeByIndex(index int) {
+	// replace to last index
+	m.queue[index] = m.queue[len(m.queue)-1]
 
-	m.queue = updatedQueue
+	// truncate away the element
+	m.queue = m.queue[:len(m.queue)-1]
 }
 
 // --- NOTE: METHODS ONLY FOR TESTING ---
