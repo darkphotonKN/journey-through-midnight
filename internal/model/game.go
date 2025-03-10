@@ -1,18 +1,22 @@
 package model
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 /**
 * Holds all the information for a specific game's meta data.
 **/
 type Game struct {
-	MsgChan *GameMsgChan // message channel to communicate with game
+	MsgChan GameMsgChan // message channel to communicate with game
 
 	// --- metadata ---
-	round int // also represents "day"
+
+	ID    uuid.UUID // unique identifier for each game
+	Round int       // also represents "day"
 
 	// players in this game instance
-	players map[uuid.UUID]PlayerState
+	Players map[uuid.UUID]*PlayerState
 }
 
 type GameMsgChan = chan string
@@ -37,13 +41,13 @@ type HeroClass struct {
 }
 
 type Attributes struct {
-	strength     int
-	intelligence int
-	wisdom       int
-	agility      int
-	vitality     int
-	faith        int
-	charisma     int
+	Strength     int
+	Intelligence int
+	Wisdom       int
+	Agility      int
+	Vitality     int
+	Faith        int
+	Charisma     int
 }
 
 type Item struct {
@@ -62,10 +66,10 @@ type Skill struct {
 type PlayerState struct {
 	Player
 	// the stage the game match has reached for any player time Time
-	heroInfo  Hero        // hero information
-	party     interface{} // TODO: update to include followers
-	inventory []Item      // global items
-	gold      int
+	HeroInfo  Hero       // hero information
+	Party     []Follower // TODO: update to include followers
+	Inventory []Item     // global items
+	Gold      int
 }
 
 type Hero struct {

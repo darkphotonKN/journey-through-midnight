@@ -92,3 +92,12 @@ func (s *Server) findPlayerByConnection(conn *websocket.Conn) (*model.Player, er
 
 	return nil, fmt.Errorf("Player with this connection does not exist.")
 }
+
+func (s *Server) startNewMatch(players []*model.Player) {
+	// check for a number under 5
+	if len(players) > 5 {
+		fmt.Println("Error: the number of players in a match cannot be more than 5.")
+		return
+	}
+
+}
