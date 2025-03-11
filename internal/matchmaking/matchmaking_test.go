@@ -1,4 +1,4 @@
-package game
+package matchmaking
 
 import (
 	"fmt"

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/game"
+	"github.com/darkphotonKN/journey-through-midnight/internal/matchmaking"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
 	"github.com/google/uuid"
 
@@ -39,7 +40,7 @@ type Server struct {
 	gameMsgChan map[*websocket.Conn]chan GameMessage
 
 	// allows launching a game and matchmaking
-	matchMaker game.MatchMaker
+	matchMaker matchmaking.MatchMaker
 
 	// other
 	mu sync.Mutex
@@ -57,8 +58,11 @@ func NewServer(listenAddr string) *Server {
 		},
 	}
 
+	// inject game factory for match maker to be able to create it's own game instances
+	gameFactory := game.InitializeGameEngine()
+
 	// instantiate a new matchmaker
-	matchMaker := game.NewMatchMaker()
+	matchMaker := matchmaking.NewMatchMaker(*gameFactory)
 
 	newServer := &Server{
 		ListenAddr:     listenAddr,
@@ -91,13 +95,4 @@ func (s *Server) findPlayerByConnection(conn *websocket.Conn) (*model.Player, er
 	}
 
 	return nil, fmt.Errorf("Player with this connection does not exist.")
-}
-
-func (s *Server) startNewMatch(players []*model.Player) {
-	// check for a number under 5
-	if len(players) > 5 {
-		fmt.Println("Error: the number of players in a match cannot be more than 5.")
-		return
-	}
-
 }

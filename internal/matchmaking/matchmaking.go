@@ -1,10 +1,11 @@
-package game
+package matchmaking
 
 import (
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/darkphotonKN/journey-through-midnight/internal/game"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
 	"github.com/google/uuid"
 )
@@ -12,7 +13,6 @@ import (
 type MatchMaker interface {
 	JoinMatchMaking(*model.Player) error
 	StartMatchMaking(interval time.Duration)
-	TryCreateMatch() (bool, uuid.UUID, model.Game)
 	GetQueueForTesting() []*model.Player
 }
 
@@ -22,11 +22,16 @@ type BaseMatchMaker struct {
 
 	// matchmaker's own mutex
 	mu sync.Mutex
+
+	// inject game engine to be able to initiate games
+	game game.GameFactory
 }
 
-func NewMatchMaker() MatchMaker {
+// NOTE: neeed to inject GameFactory for matchmaker to be able to create its own game instances
+func NewMatchMaker(gameFactory game.GameFactory) MatchMaker {
 	return &BaseMatchMaker{
 		queue: make([]*model.Player, 0),
+		game:  gameFactory,
 	}
 }
 
@@ -41,14 +46,6 @@ func (m *BaseMatchMaker) JoinMatchMaking(player *model.Player) error {
 	m.queue = append(m.queue, player)
 
 	return nil
-}
-
-/**
-* Attempts to create a match with currently queued players.
-**/
-func (m *BaseMatchMaker) TryCreateMatch() (bool, uuid.UUID, model.Game) {
-
-	return false, uuid.New(), model.Game{}
 }
 
 /**
@@ -99,8 +96,11 @@ func (m *BaseMatchMaker) matchMake() {
 		return
 	}
 
-	// TODO: creates game with these players
 	fmt.Printf("\nplayer one: %s, player two: %s\n\n", playerOne.UserName, playerTwo.UserName)
+	players := []*model.Player{playerOne, playerTwo}
+	newGameInstance := m.game.CreateGame(players)
+
+	// TODO: send new game instance to server?
 
 	// remove them from queue
 	m.removePlayerFromQueue(playerOne.ID)
