@@ -14,12 +14,14 @@ type GameFactory struct {
 	defaultPlayerState DefaultPlayerState
 }
 
+type PlayerDefaults struct {
+	DefaultGold  int
+	DefaultItems []model.Item
+}
+
 type InitialConditions struct {
 	RoundDefault   int
-	PlayerDefaults struct {
-		DefaultGold  int
-		DefaultItems []model.Item
-	}
+	PlayerDefaults PlayerDefaults
 }
 
 type DefaultPlayerState struct {
