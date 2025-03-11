@@ -72,7 +72,11 @@ func (s *Server) MessageHub() {
 			}
 
 		case newGame := <-s.matchMaker.GetNewGameChan():
-			fmt.Printf("\nNew game was started, players:\n%+v\n\n", newGame.Players)
+			fmt.Printf("\nNew game was started, players:\n\n")
+			for _, player := range newGame.Players {
+				fmt.Printf("\nPlayer: %s:\n", player.UserName)
+			}
+
 		}
 	}
 }
