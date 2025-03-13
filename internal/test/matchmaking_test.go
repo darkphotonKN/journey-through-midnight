@@ -1,20 +1,28 @@
-package matchmaking
+package test
 
 import (
 	"fmt"
 	"testing"
 	"time"
 
+	"github.com/darkphotonKN/journey-through-midnight/internal/game"
+	"github.com/darkphotonKN/journey-through-midnight/internal/matchmaking"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
+	"github.com/darkphotonKN/journey-through-midnight/internal/server"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMatchMaker_MatchMake(t *testing.T) {
 
+	// simulate game server and message hub
+	s := server.NewServer("7777")
+	go s.MessageHub()
+
 	matchWaitTime := time.Second * 3
 
-	matchMaker := NewMatchMaker()
+	gf := game.NewGameFactory(game.InitialConditions{})
+	matchMaker := matchmaking.NewMatchMaker(*gf)
 
 	matchMaker.StartMatchMaking(matchWaitTime)
 
@@ -50,7 +58,7 @@ func TestMatchMaker_MatchMake(t *testing.T) {
 	assert.Len(t, queue, 3)
 
 	// assert for only 1 player left after wait time
-	waitTimeOffset := time.Millisecond * 100
+	waitTimeOffset := time.Millisecond * 5000
 	timer := time.NewTicker(matchWaitTime + waitTimeOffset)
 
 	select {

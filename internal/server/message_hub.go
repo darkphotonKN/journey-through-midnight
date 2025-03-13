@@ -54,8 +54,7 @@ func (s *Server) MessageHub() {
 				// add client to global struct connections pool
 				s.addClient(clientPackage.Conn, player)
 
-				// TODO: initiate matchmaking for the player concurrently,
-				// right now it's only adding the player to the current online players in a match.
+				// add player to join the match making queue
 				s.matchMaker.JoinMatchMaking(&model.Player{
 					ID:       player.ID,
 					UserName: player.UserName,
