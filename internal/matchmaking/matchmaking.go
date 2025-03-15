@@ -103,6 +103,7 @@ func (m *BaseMatchMaker) matchMake() {
 	}
 
 	fmt.Printf("\nplayer one: %s, player two: %s\n\n", playerOne.UserName, playerTwo.UserName)
+
 	players := []*model.Player{playerOne, playerTwo}
 	newGameInstance := m.game.CreateGame(players)
 

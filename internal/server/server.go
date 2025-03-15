@@ -50,6 +50,10 @@ type Server struct {
 	upgrader websocket.Upgrader
 }
 
+const (
+	matchmake_duration time.Duration = 15
+)
+
 func NewServer(listenAddr string) *Server {
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -76,7 +80,7 @@ func NewServer(listenAddr string) *Server {
 	}
 
 	// start matchmaking goroutine
-	newServer.matchMaker.StartMatchMaking(time.Second * 20)
+	newServer.matchMaker.StartMatchMaking(time.Second * matchmake_duration)
 
 	return newServer
 }
