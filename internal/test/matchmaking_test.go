@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/darkphotonKN/journey-through-midnight/internal/game"
-	"github.com/darkphotonKN/journey-through-midnight/internal/matchmaking"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
 	"github.com/darkphotonKN/journey-through-midnight/internal/server"
 	"github.com/google/uuid"
@@ -21,10 +19,7 @@ func TestMatchMaker_MatchMake(t *testing.T) {
 
 	matchWaitTime := time.Second * 3
 
-	gf := game.NewGameFactory(game.InitialConditions{})
-	matchMaker := matchmaking.NewMatchMaker(*gf)
-
-	matchMaker.StartMatchMaking(matchWaitTime)
+	matchMaker := s.GetMatchmaker()
 
 	playerOneUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111111")
 	playerTwoUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111112")
@@ -58,7 +53,7 @@ func TestMatchMaker_MatchMake(t *testing.T) {
 	assert.Len(t, queue, 3)
 
 	// assert for only 1 player left after wait time
-	waitTimeOffset := time.Millisecond * 5000
+	waitTimeOffset := time.Millisecond * 500
 	timer := time.NewTicker(matchWaitTime + waitTimeOffset)
 
 	select {

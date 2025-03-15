@@ -100,3 +100,8 @@ func (s *Server) findPlayerByConnection(conn *websocket.Conn) (*model.Player, er
 
 	return nil, fmt.Errorf("Player with this connection does not exist.")
 }
+
+// NOTE: Methods for only testing
+func (s *Server) GetMatchmaker() *matchmaking.MatchMaker {
+	return &s.matchMaker
+}

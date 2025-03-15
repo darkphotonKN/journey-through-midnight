@@ -89,7 +89,6 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 			conn.WriteJSON(GameMessage{Action: "Error", Payload: "Your message to server was the incorrect format and could not be decoded as JSON."})
 			continue
 		}
-
 		// handle concurrent writes back to clients
 		s.setupClientWriter(conn)
 

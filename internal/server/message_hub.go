@@ -13,11 +13,12 @@ func (s *Server) MessageHub() {
 	fmt.Println("Starting Message Hub")
 
 	for {
-		fmt.Printf("Current client connections in session: %+v\n\n", s.playersOnline)
 
 		select {
 		case clientPackage := <-s.serverChan:
 			fmt.Printf("Client Package received: %+v\n\n", clientPackage)
+
+			fmt.Printf("------> Current client connections in session: %+v\n\n", s.playersOnline)
 
 			// deduce player from package
 			player, err := s.findPlayerByConnection(clientPackage.Conn)
