@@ -19,6 +19,9 @@ func TestMatchMaker_MatchMake(t *testing.T) {
 
 	matchMaker := s.GetMatchmaker()
 
+	matchWaitTime := time.Second * 1
+	matchMaker.StartMatchMaking(matchWaitTime) // overwrite original game wait time
+
 	playerOneUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111111")
 	playerTwoUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111112")
 	playerThreeUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111113")
@@ -49,8 +52,6 @@ func TestMatchMaker_MatchMake(t *testing.T) {
 
 	// test for length of initial queue
 	assert.Len(t, queue, 3)
-
-	matchWaitTime := time.Second * 15
 
 	// assert for only 1 player left after wait time
 	waitTimeOffset := time.Millisecond * 500

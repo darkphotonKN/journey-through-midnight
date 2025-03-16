@@ -56,11 +56,21 @@ func (s *Server) MessageHub() {
 				s.addClient(clientPackage.Conn, player)
 
 				// add player to join the match making queue
-				s.matchMaker.JoinMatchMaking(&model.Player{
+				err := s.matchMaker.JoinMatchMaking(&model.Player{
 					ID:       player.ID,
 					UserName: player.UserName,
 					Conn:     clientPackage.Conn,
 				})
+
+				if err != nil {
+					// get game msg channel
+					gameMsgChan, chanErr := s.getGameMsgChan(clientPackage.Conn)
+
+					if chanErr != nil {
+						fmt.Printf("Error when attempting to send message back to player: %s.", err)
+					}
+					gameMsgChan <- GameMessage{Action: "", Payload: err}
+				}
 
 			case buy_item:
 				fmt.Printf("Player %+v is attempting to buy an item.\n", clientPackage)

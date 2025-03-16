@@ -44,6 +44,12 @@ func (m *BaseMatchMaker) JoinMatchMaking(player *model.Player) error {
 
 	fmt.Printf("Player %s has queued for a game.\n", player.UserName)
 
+	for _, playerInQueue := range m.queue {
+		if playerInQueue.ID == player.ID {
+			return fmt.Errorf("Player has already queued.")
+		}
+	}
+
 	// adds player to queue
 	m.queue = append(m.queue, player)
 
