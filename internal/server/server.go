@@ -102,6 +102,6 @@ func (s *Server) findPlayerByConnection(conn *websocket.Conn) (*model.Player, er
 }
 
 // NOTE: Methods for only testing
-func (s *Server) GetMatchmaker() *matchmaking.MatchMaker {
-	return &s.matchMaker
+func (s *Server) GetMatchmaker() matchmaking.MatchMaker {
+	return s.matchMaker
 }

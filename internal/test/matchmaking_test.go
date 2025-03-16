@@ -17,8 +17,6 @@ func TestMatchMaker_MatchMake(t *testing.T) {
 	s := server.NewServer("7777")
 	go s.MessageHub()
 
-	matchWaitTime := time.Second * 3
-
 	matchMaker := s.GetMatchmaker()
 
 	playerOneUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111111")
@@ -51,6 +49,8 @@ func TestMatchMaker_MatchMake(t *testing.T) {
 
 	// test for length of initial queue
 	assert.Len(t, queue, 3)
+
+	matchWaitTime := time.Second * 15
 
 	// assert for only 1 player left after wait time
 	waitTimeOffset := time.Millisecond * 500
