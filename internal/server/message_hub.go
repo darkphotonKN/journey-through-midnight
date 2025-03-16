@@ -69,7 +69,11 @@ func (s *Server) MessageHub() {
 					if chanErr != nil {
 						fmt.Printf("Error when attempting to send message back to player: %s.", err)
 					}
-					gameMsgChan <- GameMessage{Action: "", Payload: err}
+
+					gameMsgChan <- GameMessage{Action: "error", Payload: struct {
+						Message string `json:"message"`
+					}{Message: err.Error()}}
+
 				}
 
 			case buy_item:

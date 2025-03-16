@@ -46,6 +46,8 @@ func (m *BaseMatchMaker) JoinMatchMaking(player *model.Player) error {
 
 	for _, playerInQueue := range m.queue {
 		if playerInQueue.ID == player.ID {
+			fmt.Println("Player with the same ID attempted to join.")
+
 			return fmt.Errorf("Player has already queued.")
 		}
 	}
