@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -12,7 +11,6 @@ import (
 )
 
 func TestMatchMaker_MatchMake(t *testing.T) {
-
 	// simulate game server and message hub
 	s := server.NewServer("7777")
 	go s.MessageHub()
@@ -45,10 +43,21 @@ func TestMatchMaker_MatchMake(t *testing.T) {
 	matchMaker.JoinMatchMaking(&playerOne)
 	matchMaker.JoinMatchMaking(&playerTwo)
 	matchMaker.JoinMatchMaking(&playerThree)
+	matchMaker.JoinMatchMaking(&playerThree)
 
 	queue := matchMaker.GetQueueForTesting()
 
-	fmt.Printf("\ncurrent queue: %+v\n\n", queue)
+	playerThreeCount := 0
+
+	for _, player := range queue {
+
+		if player.ID == playerThreeUUID {
+			playerThreeCount++
+		}
+	}
+
+	// make sure player 3 only appears once despite joining twice
+	assert.Equal(t, playerThreeCount, 1)
 
 	// test for length of initial queue
 	assert.Len(t, queue, 3)
@@ -63,6 +72,4 @@ func TestMatchMaker_MatchMake(t *testing.T) {
 
 		assert.Len(t, queue, 1)
 	}
-
-	// TODO: assert for players 1 and 2 not in queue
 }

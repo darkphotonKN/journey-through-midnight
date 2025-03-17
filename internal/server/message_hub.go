@@ -15,6 +15,8 @@ func (s *Server) MessageHub() {
 	for {
 
 		select {
+
+		// --- handling client sent messages passed on from the server ---
 		case clientPackage := <-s.serverChan:
 			fmt.Printf("Client Package received: %+v\n\n", clientPackage)
 
@@ -62,12 +64,14 @@ func (s *Server) MessageHub() {
 					Conn:     clientPackage.Conn,
 				})
 
+				// responsd error back to client
 				if err != nil {
-					// get game msg channel
+					// game client-specific channel
 					gameMsgChan, chanErr := s.getGameMsgChan(clientPackage.Conn)
 
 					if chanErr != nil {
 						fmt.Printf("Error when attempting to send message back to player: %s.", err)
+						continue
 					}
 
 					gameMsgChan <- GameMessage{Action: "error", Payload: struct {
@@ -82,13 +86,15 @@ func (s *Server) MessageHub() {
 			// TODO: Move this to its own instance or implement a way to validate game instance
 			case match_error:
 				fmt.Println("Match errored from client side.")
-				break
+				continue
 			}
 
+		// --- handling new game initializations ---
 		case newGame := <-s.matchMaker.GetNewGameChan():
+
 			fmt.Printf("\nNew game was started, players:\n\n")
 			for _, player := range newGame.Players {
-				fmt.Printf("\nPlayer: %s:\n", player.UserName)
+				fmt.Printf("\nPlayer: %s\n", player.UserName)
 			}
 
 		}

@@ -19,11 +19,29 @@ type Game struct {
 	Players map[uuid.UUID]*PlayerState
 }
 
+/**
+* Holds all Game Event information
+**/
+type GameEvent struct {
+	Type EventType
+	Name string
+}
+
+type EventType string
+
+const (
+	Fight          EventType = "fight"
+	PlayerOpponent EventType = "player_opponent"
+	FoundItem      EventType = "found_item"
+	Encounter      EventType = "encounter" // details TBD
+	Shop           EventType = "shop"
+)
+
 type GameMsgChan = chan string
 
 type Time struct {
-	day  int
-	hour int
+	Day  int
+	Hour int
 }
 
 type HeroClassName string
@@ -70,6 +88,7 @@ type PlayerState struct {
 	Party     []Follower // TODO: update to include followers
 	Inventory []Item     // global items
 	Gold      int
+	Time      Time // time the player has reached
 }
 
 type Hero struct {
