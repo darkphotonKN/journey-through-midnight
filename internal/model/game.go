@@ -19,8 +19,12 @@ type Game struct {
 	Players map[uuid.UUID]*PlayerState
 }
 
+type GameMsgChan = chan string
+
 /**
-* Holds all Game Event information
+* Responsible for Game Events.
+* Each round in the game, for each player, is an "Event".
+* An event passes time and provides changes to the player's core state.
 **/
 type GameEvent struct {
 	Type EventType
@@ -36,8 +40,6 @@ const (
 	Encounter      EventType = "encounter" // details TBD
 	Shop           EventType = "shop"
 )
-
-type GameMsgChan = chan string
 
 type Time struct {
 	Day  int

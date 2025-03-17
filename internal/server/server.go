@@ -63,7 +63,7 @@ func NewServer(listenAddr string) *Server {
 	}
 
 	// inject game factory for match maker to be able to create it's own game instances
-	gameFactory := game.InitializeGameEngine()
+	gameFactory := game.InitializeNewGameFactory()
 
 	// instantiate a new matchmaker
 	matchMaker := matchmaking.NewMatchMaker(*gameFactory)

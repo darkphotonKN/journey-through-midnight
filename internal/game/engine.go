@@ -7,47 +7,26 @@ import "github.com/darkphotonKN/journey-through-midnight/internal/model"
 * the logic, events, turns, etc.
 **/
 
-const (
-	startingGold     int = 10
-	maxInventorySize int = 5
-)
-
-func InitializeGameEngine() *GameFactory {
-
-	initialConditions := InitialConditions{
-		RoundDefault: 1,
-		PlayerDefaults: PlayerDefaults{
-			DefaultGold:  startingGold,
-			DefaultItems: make([]model.Item, 5),
-		},
-	}
-
-	// allow creating a game with factory
-	defaultGameCreator := NewGameFactory(initialConditions)
-
-	return defaultGameCreator
+type GameEngine struct {
+	eventHandler *EventHandler
 }
-
-/**
-* All the logic that surrounds starting an actual game.
-**/
 
 /**
 * Handles the logic for ending the game round.
 **/
-func (g *model.Game) ProcessEndRound() {
+func (e *GameEngine) ProcessEndRound(game *model.Game) {
 	// increment round
-	g.Round = g.Round + 1
+	game.Round++
 }
 
 /**
 * Process's a single player's round
 **/
-func (g *model.Game) ProcessPlayerRound(event GameEvent, playerState *model.PlayerState) {
+func (e *GameEngine) ProcessPlayerRound(game *model.Game, event model.GameEvent, playerState *model.PlayerState) {
 	defaultEventHours := 1
 
 	// play out event
-	playerState = event.initiateEvent(event.Type)
+	playerState = e.eventHandler.initiateEvent(event.Type)
 
 	// increment their hours after event
 	playerState.Time = model.Time{
@@ -56,5 +35,5 @@ func (g *model.Game) ProcessPlayerRound(event GameEvent, playerState *model.Play
 	}
 
 	// update player state
-	g.Players[playerState.ID] = playerState
+	game.Players[playerState.ID] = playerState
 }

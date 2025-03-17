@@ -73,3 +73,24 @@ func (f *GameFactory) CreateGame(players []*model.Player) *model.Game {
 		Players: playerStates,
 	}
 }
+
+const (
+	startingGold     int = 10
+	maxInventorySize int = 5
+)
+
+func InitializeNewGameFactory() *GameFactory {
+
+	initialConditions := InitialConditions{
+		RoundDefault: 1,
+		PlayerDefaults: PlayerDefaults{
+			DefaultGold:  startingGold,
+			DefaultItems: make([]model.Item, 5),
+		},
+	}
+
+	// allow creating a game with factory
+	defaultGameCreator := NewGameFactory(initialConditions)
+
+	return defaultGameCreator
+}
