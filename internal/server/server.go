@@ -34,7 +34,7 @@ type Server struct {
 	connToPlayerID map[*websocket.Conn]uuid.UUID
 
 	// all current game connections
-	games map[uuid.UUID]model.Game
+	games map[uuid.UUID]game.Game
 
 	// stores unique ws connections for writing back to each client
 	gameMsgChan map[*websocket.Conn]chan GameMessage
@@ -73,7 +73,7 @@ func NewServer(listenAddr string) *Server {
 		upgrader:       upgrader,
 		serverChan:     make(chan ClientPackage),
 		playersOnline:  make(map[uuid.UUID]model.Player),
-		games:          make(map[uuid.UUID]model.Game),
+		games:          make(map[uuid.UUID]game.Game),
 		connToPlayerID: make(map[*websocket.Conn]uuid.UUID),
 		gameMsgChan:    make(map[*websocket.Conn]chan GameMessage),
 		matchMaker:     matchMaker,

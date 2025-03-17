@@ -14,7 +14,7 @@ type MatchMaker interface {
 	JoinMatchMaking(*model.Player) error
 	StartMatchMaking(interval time.Duration)
 	GetQueueForTesting() []*model.Player
-	GetNewGameChan() <-chan *model.Game
+	GetNewGameChan() <-chan *game.Game
 }
 
 type BaseMatchMaker struct {
@@ -25,7 +25,7 @@ type BaseMatchMaker struct {
 	game game.GameFactory
 
 	// communication between server and matchmaking process to receive new games
-	newGameChan chan *model.Game
+	newGameChan chan *game.Game
 }
 
 // NOTE: neeed to inject GameFactory for matchmaker to be able to create its own game instances
@@ -33,7 +33,7 @@ func NewMatchMaker(gameFactory game.GameFactory) MatchMaker {
 	return &BaseMatchMaker{
 		queue:       make([]*model.Player, 0),
 		game:        gameFactory,
-		newGameChan: make(chan *model.Game),
+		newGameChan: make(chan *game.Game),
 	}
 }
 
@@ -58,7 +58,7 @@ func (m *BaseMatchMaker) JoinMatchMaking(player *model.Player) error {
 	return nil
 }
 
-func (m *BaseMatchMaker) GetNewGameChan() <-chan *model.Game {
+func (m *BaseMatchMaker) GetNewGameChan() <-chan *game.Game {
 	return m.newGameChan
 }
 

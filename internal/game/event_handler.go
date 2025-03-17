@@ -1,7 +1,5 @@
 package game
 
-import "github.com/darkphotonKN/journey-through-midnight/internal/model"
-
 /**
 * Event handler processes events and their outcome.
 **/
@@ -16,8 +14,8 @@ func NewEventHandler() *EventHandler {
 * Initiates a random event, waits for player choices, and outputs the results.
 **/
 // TODO: initiate a random event and play out the results
-func (h *EventHandler) initiateEvent(eventType model.EventType) *model.PlayerState {
-	return &model.PlayerState{}
+func (h *EventHandler) initiateEvent(eventType EventType) *PlayerState {
+	return &PlayerState{}
 }
 
 /**
@@ -26,7 +24,7 @@ func (h *EventHandler) initiateEvent(eventType model.EventType) *model.PlayerSta
 * Provides a bunch of items, waits for response, adds chosen item to player's
 * arsenal and deducts their gold.
 **/
-func (h *EventHandler) runShopEvent() *model.PlayerState {
+func (h *EventHandler) runShopEvent() *PlayerState {
 	// send player list of purchaseable items
 
 	// allow purchase

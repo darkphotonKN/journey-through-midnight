@@ -16,7 +16,7 @@ type GameFactory struct {
 
 type PlayerDefaults struct {
 	DefaultGold  int
-	DefaultItems []model.Item
+	DefaultItems []Item
 }
 
 type InitialConditions struct {
@@ -26,8 +26,8 @@ type InitialConditions struct {
 
 type DefaultPlayerState struct {
 	defaultGold       int
-	defaultItems      []model.Item
-	defaultAttributes model.Attributes
+	defaultItems      []Item
+	defaultAttributes Attributes
 }
 
 func NewGameFactory(initialConditions InitialConditions) *GameFactory {
@@ -37,7 +37,7 @@ func NewGameFactory(initialConditions InitialConditions) *GameFactory {
 		defaultPlayerState: DefaultPlayerState{
 			defaultGold:  initialConditions.PlayerDefaults.DefaultGold,
 			defaultItems: initialConditions.PlayerDefaults.DefaultItems,
-			defaultAttributes: model.Attributes{
+			defaultAttributes: Attributes{
 				Strength:     1,
 				Intelligence: 1,
 				Wisdom:       1,
@@ -54,19 +54,19 @@ func NewGameFactory(initialConditions InitialConditions) *GameFactory {
 * Core game creation, based on factory settings and converting all passed
 * in players into "PlayerState"s.
 **/
-func (f *GameFactory) CreateGame(players []*model.Player) *model.Game {
+func (f *GameFactory) CreateGame(players []*model.Player) *Game {
 	// convert Players to PlayerState
-	playerStates := make(map[uuid.UUID]*model.PlayerState)
+	playerStates := make(map[uuid.UUID]*PlayerState)
 
 	for _, player := range players {
-		playerStates[player.ID] = &model.PlayerState{
+		playerStates[player.ID] = &PlayerState{
 			Player:    *player,
 			Gold:      f.defaultPlayerState.defaultGold,
 			Inventory: f.defaultPlayerState.defaultItems,
 		}
 	}
 
-	return &model.Game{
+	return &Game{
 		ID:      uuid.New(),
 		MsgChan: make(chan string),
 		Round:   f.defaultRound,
@@ -85,7 +85,7 @@ func InitializeNewGameFactory() *GameFactory {
 		RoundDefault: 1,
 		PlayerDefaults: PlayerDefaults{
 			DefaultGold:  startingGold,
-			DefaultItems: make([]model.Item, 5),
+			DefaultItems: make([]Item, 5),
 		},
 	}
 
