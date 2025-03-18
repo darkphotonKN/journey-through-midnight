@@ -115,7 +115,6 @@ func (m *BaseMatchMaker) matchMake() {
 	players := []*model.Player{playerOne, playerTwo}
 	newGameInstance := m.game.CreateGame(players)
 
-	// TODO: send new game instance to server?
 	m.newGameChan <- newGameInstance
 
 	// remove them from queue

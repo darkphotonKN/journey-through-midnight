@@ -34,7 +34,7 @@ type Server struct {
 	connToPlayerID map[*websocket.Conn]uuid.UUID
 
 	// all current game connections
-	games map[uuid.UUID]game.Game
+	games map[uuid.UUID]*game.Game
 
 	// stores unique ws connections for writing back to each client
 	gameMsgChan map[*websocket.Conn]chan GameMessage
@@ -73,7 +73,7 @@ func NewServer(listenAddr string) *Server {
 		upgrader:       upgrader,
 		serverChan:     make(chan ClientPackage),
 		playersOnline:  make(map[uuid.UUID]model.Player),
-		games:          make(map[uuid.UUID]game.Game),
+		games:          make(map[uuid.UUID]*game.Game),
 		connToPlayerID: make(map[*websocket.Conn]uuid.UUID),
 		gameMsgChan:    make(map[*websocket.Conn]chan GameMessage),
 		matchMaker:     matchMaker,
@@ -85,6 +85,10 @@ func NewServer(listenAddr string) *Server {
 	return newServer
 }
 
+/**
+* Finds a player by their unique websocket connection, in the case that
+* id is unknown or not straight forward to acquire.
+**/
 func (s *Server) findPlayerByConnection(conn *websocket.Conn) (*model.Player, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -99,6 +103,24 @@ func (s *Server) findPlayerByConnection(conn *websocket.Conn) (*model.Player, er
 	}
 
 	return nil, fmt.Errorf("Player with this connection does not exist.")
+}
+
+/**
+* Adds a created game to the list of games tracked on the server.
+**/
+func (s *Server) addGameToServer(g *game.Game) error {
+	newUuid, _ := uuid.NewUUID()
+
+	_, exists := s.games[newUuid]
+
+	if exists {
+		return game.ErrGameExists
+	}
+
+	// add to server's list of games
+	s.games[newUuid] = g
+
+	return nil
 }
 
 // NOTE: Methods for only testing

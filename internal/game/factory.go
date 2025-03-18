@@ -51,7 +51,7 @@ func NewGameFactory(initialConditions InitialConditions) *GameFactory {
 }
 
 /**
-* Core game creation, based on factory settings and converting all passed
+* Core game creation (constuctor), based on factory settings and converting all passed
 * in players into "PlayerState"s.
 **/
 func (f *GameFactory) CreateGame(players []*model.Player) *Game {
@@ -66,11 +66,16 @@ func (f *GameFactory) CreateGame(players []*model.Player) *Game {
 		}
 	}
 
+	eventHandler := NewEventHandler()
+
 	return &Game{
 		ID:      uuid.New(),
 		MsgChan: make(chan string),
 		Round:   f.defaultRound,
 		Players: playerStates,
+
+		// inject eventHandler
+		eventHandler: eventHandler,
 	}
 }
 

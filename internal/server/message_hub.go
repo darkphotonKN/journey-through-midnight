@@ -3,7 +3,9 @@ package server
 import (
 	"fmt"
 
+	"github.com/darkphotonKN/journey-through-midnight/internal/game"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
+	"github.com/google/uuid"
 )
 
 /**
@@ -96,6 +98,64 @@ func (s *Server) MessageHub() {
 			for _, player := range newGame.Players {
 				fmt.Printf("\nPlayer: %s\n", player.UserName)
 			}
+
+			// store new game on server and start initializing a unique goroutine for
+			// the respective players
+			err := s.addGameToServer(newGame)
+
+			if err != nil {
+				// get each game client-specific channel and send them the error
+				playerGameMsgChans := make(map[uuid.UUID]chan GameMessage)
+
+				for _, player := range newGame.Players {
+					gameMsgChan, chanErr := s.getGameMsgChan(player.Conn)
+
+					// skip non-existant channels
+					if chanErr != nil {
+						continue
+					}
+
+					playerGameMsgChans[player.ID] = gameMsgChan
+				}
+
+				// game already exists
+				if err == game.ErrGameExists {
+					// broadcast to each player the error
+
+					for _, player := range newGame.Players {
+						// get that player's channel
+						gameMsgChan := playerGameMsgChans[player.ID]
+
+						gameMsgChan <- GameMessage{Action: "error", Payload: struct {
+							Message string `json:"message"`
+						}{Message: err.Error()}}
+					}
+
+				}
+
+				for _, player := range newGame.Players {
+					// get that player's channel
+					gameMsgChan := playerGameMsgChans[player.ID]
+
+					gameMsgChan <- GameMessage{Action: "error", Payload: struct {
+						Message string `json:"message"`
+					}{Message: "Unknown error occured when attempting to start game."}}
+				}
+
+			}
+
+			// -- start game management goroutine --
+
+			// NOTE:
+			// Player 1 WebSocket <--> Read Goroutine ---> |
+			//																				 Message Hub  <--> Game Goroutine
+			// Player 2 WebSocket <--> Read Goroutine ---> |
+			//                                             |
+			//                  Write Goroutines <----     |
+			// Server owns the connection, sessions, and coordination so this lives in server
+			// Game owns the logic, rules, and state of the game
+
+			go s.manageGameLoop(newGame.ID)
 
 		}
 	}
