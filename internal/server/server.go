@@ -123,6 +123,34 @@ func (s *Server) addGameToServer(g *game.Game) error {
 	return nil
 }
 
+/**
+* Manages each unique game and it's coordinations.
+**/
+func (s *Server) manageGameLoop(gameId uuid.UUID) {
+	serverTick := time.Second // one second per game "tick"
+	ticker := time.NewTicker(serverTick)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			s.mu.Lock()
+			game, exists := s.games[gameId]
+			defer s.mu.Unlock()
+
+			if !exists {
+				// stop this goroutine, game ended or errored
+				fmt.Println("Game has already stopped prior, exiting goroutine.")
+				break
+			}
+
+			fmt.Printf("game %s currently on round: %d.\n", game.ID, game.Round)
+
+			s.mu.Unlock()
+		}
+	}
+}
+
 // NOTE: Methods for only testing
 func (s *Server) GetMatchmaker() matchmaking.MatchMaker {
 	return s.matchMaker

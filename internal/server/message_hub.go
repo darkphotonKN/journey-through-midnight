@@ -18,7 +18,7 @@ func (s *Server) MessageHub() {
 
 		select {
 
-		// --- handling client sent messages passed on from the server ---
+		// --- handling messages sent from server over serverChan ---
 		case clientPackage := <-s.serverChan:
 			fmt.Printf("Client Package received: %+v\n\n", clientPackage)
 
@@ -43,7 +43,9 @@ func (s *Server) MessageHub() {
 				continue
 			}
 
+			// -- serving messages based on action type --
 			switch clientPackage.GameMessage.Action {
+
 			case find_match:
 				fmt.Println("Inside 'find match' case, payload:", clientPackage.GameMessage.Payload)
 
@@ -66,7 +68,7 @@ func (s *Server) MessageHub() {
 					Conn:     clientPackage.Conn,
 				})
 
-				// responsd error back to client
+				// response error back to client
 				if err != nil {
 					// game client-specific channel
 					gameMsgChan, chanErr := s.getGameMsgChan(clientPackage.Conn)
@@ -82,13 +84,17 @@ func (s *Server) MessageHub() {
 
 				}
 
+			// cases accessible only after game started
+
 			case buy_item:
 				fmt.Printf("Player %+v is attempting to buy an item.\n", clientPackage)
 
-			// TODO: Move this to its own instance or implement a way to validate game instance
+				// send instruction over to game loop
+
 			case match_error:
 				fmt.Println("Match errored from client side.")
 				continue
+
 			}
 
 		// --- handling new game initializations ---
@@ -156,7 +162,6 @@ func (s *Server) MessageHub() {
 			// Game owns the logic, rules, and state of the game
 
 			go s.manageGameLoop(newGame.ID)
-
 		}
 	}
 }
