@@ -15,7 +15,6 @@ func (s *Server) MessageHub() {
 	fmt.Println("Starting Message Hub")
 
 	for {
-
 		select {
 
 		// --- handling messages sent from server over serverChan ---
@@ -85,6 +84,8 @@ func (s *Server) MessageHub() {
 				}
 
 			// cases accessible only after game started
+			// TODO: initialize game-specific channel for communication with
+			// the relavant game management goroutines
 
 			case buy_item:
 				fmt.Printf("Player %+v is attempting to buy an item.\n", clientPackage)
@@ -100,7 +101,7 @@ func (s *Server) MessageHub() {
 		// --- handling new game initializations ---
 		case newGame := <-s.matchMaker.GetNewGameChan():
 
-			fmt.Printf("\nNew game was started, players:\n\n")
+			fmt.Printf("\nNew game was started. Game Info\n\n%+v\n\nplayers:\n", newGame)
 			for _, player := range newGame.Players {
 				fmt.Printf("\nPlayer: %s\n", player.UserName)
 			}
@@ -147,7 +148,6 @@ func (s *Server) MessageHub() {
 						Message string `json:"message"`
 					}{Message: "Unknown error occured when attempting to start game."}}
 				}
-
 			}
 
 			// -- start game management goroutine --

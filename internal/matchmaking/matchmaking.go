@@ -117,7 +117,7 @@ func (m *BaseMatchMaker) matchMake() {
 
 	m.newGameChan <- newGameInstance
 
-	// remove them from queue
+	// remove them from the queue
 	m.removePlayerFromQueue(playerOne.ID)
 	m.removePlayerFromQueue(playerTwo.ID)
 

@@ -109,16 +109,17 @@ func (s *Server) findPlayerByConnection(conn *websocket.Conn) (*model.Player, er
 * Adds a created game to the list of games tracked on the server.
 **/
 func (s *Server) addGameToServer(g *game.Game) error {
-	newUuid, _ := uuid.NewUUID()
 
-	_, exists := s.games[newUuid]
+	_, exists := s.games[g.ID]
 
 	if exists {
 		return game.ErrGameExists
 	}
 
 	// add to server's list of games
-	s.games[newUuid] = g
+	s.games[g.ID] = g
+
+	fmt.Printf("\ncurrent list of games: %+v\n\n", s.games)
 
 	return nil
 }
@@ -135,13 +136,17 @@ func (s *Server) manageGameLoop(gameId uuid.UUID) {
 		select {
 		case <-ticker.C:
 			s.mu.Lock()
+
+			fmt.Printf("\ngameId: %v\n\n", gameId)
 			game, exists := s.games[gameId]
 			defer s.mu.Unlock()
+
+			fmt.Printf("\ngame exists: %v\n\n", exists)
 
 			if !exists {
 				// stop this goroutine, game ended or errored
 				fmt.Println("Game has already stopped prior, exiting goroutine.")
-				break
+				return
 			}
 
 			fmt.Printf("game %s currently on round: %d.\n", game.ID, game.Round)
