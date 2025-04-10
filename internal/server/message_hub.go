@@ -46,9 +46,7 @@ func (s *Server) MessageHub() {
 			switch clientPackage.GameMessage.Action {
 
 			case find_match:
-				fmt.Println("Inside 'find match' case, payload:", clientPackage.GameMessage.Payload)
-
-				// assert Payload type specific to gameMessage.Action == "find_match", which is Player
+				// assert Payload type specific to gameMessage.Action == "find_match", which is PlayerRequest
 				player, ok := clientPackage.GameMessage.Payload.(model.PlayerRequest)
 
 				if !ok {
@@ -125,7 +123,6 @@ func (s *Server) MessageHub() {
 					playerGameMsgChans[player.ID] = gameMsgChan
 				}
 
-				// game already exists
 				if err == game.ErrGameExists {
 					// broadcast to each player the error
 
@@ -154,14 +151,21 @@ func (s *Server) MessageHub() {
 
 			// NOTE:
 			// Player 1 WebSocket <--> Read Goroutine ---> |
-			//																				 Message Hub  <--> Game Goroutine
+			//															Server.Message Hub Goroutine  <-->  Game.ManageGameLoop Goroutine
 			// Player 2 WebSocket <--> Read Goroutine ---> |
 			//                                             |
 			//                  Write Goroutines <----     |
-			// Server owns the connection, sessions, and coordination so this lives in server
-			// Game owns the logic, rules, and state of the game
 
-			go s.manageGameLoop(newGame.ID)
+			go newGame.ManageGameLoop()
+
+		// TOOD: communicate events to an existing game loop
+		case eventChoice := <-s.serverChan:
+
+			// find game message channel
+			ch := s.games[uuid.New()].MsgCh
+
+			ch <- eventChoice.GameMessage.Payload.(string)
+
 		}
 	}
 }

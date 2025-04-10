@@ -38,7 +38,7 @@ func NewMatchMaker(gameFactory game.GameFactory) MatchMaker {
 }
 
 /**
-* Allows a player to matchmaking.
+* Allows a player to join matchmaking.
 **/
 func (m *BaseMatchMaker) JoinMatchMaking(player *model.Player) error {
 

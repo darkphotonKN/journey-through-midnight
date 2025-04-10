@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -120,40 +121,24 @@ func (s *Server) addGameToServer(g *game.Game) error {
 	s.games[g.ID] = g
 
 	fmt.Printf("\ncurrent list of games: %+v\n\n", s.games)
-
 	return nil
 }
 
 /**
-* Manages each unique game and it's coordinations.
+* Find existing player in game instance.
 **/
-func (s *Server) manageGameLoop(gameId uuid.UUID) {
-	serverTick := time.Second // one second per game "tick"
-	ticker := time.NewTicker(serverTick)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			s.mu.Lock()
-
-			fmt.Printf("\ngameId: %v\n\n", gameId)
-			game, exists := s.games[gameId]
-			defer s.mu.Unlock()
-
-			fmt.Printf("\ngame exists: %v\n\n", exists)
-
-			if !exists {
-				// stop this goroutine, game ended or errored
-				fmt.Println("Game has already stopped prior, exiting goroutine.")
-				return
+func (s *Server) findGameWithPlayer(id uuid.UUID) (*game.Game, error) {
+	// loop through every single game and try to find if the player exists
+	for _, game := range s.games {
+		// find player inside game instance
+		for _, player := range game.Players {
+			if player.ID == id {
+				return game, nil
 			}
-
-			fmt.Printf("game %s currently on round: %d.\n", game.ID, game.Round)
-
-			s.mu.Unlock()
 		}
 	}
+
+	return nil, errors.New("No player with this connection was found with any game.")
 }
 
 // NOTE: Methods for only testing

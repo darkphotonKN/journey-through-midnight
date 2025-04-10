@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
@@ -35,7 +36,7 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 	// removes client and closes connection
 	defer func() {
 		fmt.Println("Connection closed due to end of function.")
-		s.removeClient(conn)
+		s.removeClientOnline(conn)
 	}()
 
 	for {
@@ -184,7 +185,7 @@ func (s *Server) addClient(conn *websocket.Conn, playerRequest model.PlayerReque
 /**
 * Removes a player from the list of online players via their unique connection.
 **/
-func (s *Server) removeClient(conn *websocket.Conn) {
+func (s *Server) removeClientOnline(conn *websocket.Conn) {
 	// lock and unlock to prevent race conditions
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -193,25 +194,41 @@ func (s *Server) removeClient(conn *websocket.Conn) {
 	player, err := s.findPlayerByConnection(conn)
 
 	if err != nil {
-		fmt.Printf("Error when attempting to find player with connection %s\n", err)
+		fmt.Printf("Error when attempting to find player with connection: %s\n", err)
 		return
 	}
 
 	// remove from list of connections
 	delete(s.playersOnline, player.ID)
 
-	fmt.Println("Player removed from server:", player)
+	fmt.Printf("\nPlayer removed from server: \n%+v\n\n", player)
 }
 
 /**
-* Cleans up the client connected to the online server from all relevant data structures.
+* Cleans everything related to the client, removing them from the online players,
+* from any internal game instances, etc.
 **/
 func (s *Server) cleanUpClient(conn *websocket.Conn) {
 	s.mu.Lock()
+
 	defer s.mu.Unlock()
 
+	player, _ := s.findPlayerByConnection(conn)
+
+	// remove from their game
+	game, err := s.findGameWithPlayer(player.ID)
+	if err != nil {
+		log.Println(err)
+	}
+	game.RemovePlayer(player.ID)
+
+	// if game has no players anymore, also close game by closing game channel
+	if len(game.Players) == 0 {
+		close(game.CloseGameCh)
+	}
+
 	// removes client from players online
-	s.removeClient(conn)
+	s.removeClientOnline(conn)
 
 	// close their channel
 	channel, _ := s.getGameMsgChan(conn)

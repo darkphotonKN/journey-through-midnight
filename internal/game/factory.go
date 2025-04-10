@@ -70,7 +70,7 @@ func (f *GameFactory) CreateGame(players []*model.Player) *Game {
 
 	return &Game{
 		ID:      uuid.New(),
-		MsgChan: make(chan string),
+		MsgCh:   make(chan string),
 		Round:   f.defaultRound,
 		Players: playerStates,
 

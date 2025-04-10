@@ -10,12 +10,22 @@ func NewEventHandler() *EventHandler {
 	return &EventHandler{}
 }
 
+const (
+	defaultEventHours = 1
+)
+
 /**
 * Initiates a random event, waits for player choices, and outputs the results.
 **/
 // TODO: initiate a random event and play out the results
-func (h *EventHandler) initiateEvent(eventType EventType) *PlayerState {
-	return &PlayerState{}
+func (h *EventHandler) initiateEvent(eventType EventType, playerState *PlayerState) {
+
+	// increment their hours after event
+	playerState.Time = Time{
+		Day:  playerState.Time.Day,
+		Hour: playerState.Time.Hour + defaultEventHours,
+	}
+
 }
 
 /**

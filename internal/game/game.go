@@ -1,8 +1,9 @@
 package game
 
-import "github.com/darkphotonKN/journey-through-midnight/internal/model"
-
 import (
+	"sync"
+
+	"github.com/darkphotonKN/journey-through-midnight/internal/model"
 	"github.com/google/uuid"
 )
 
@@ -10,16 +11,22 @@ import (
 * Holds all the information for a specific game's meta data.
 **/
 type Game struct {
-	MsgChan      GameMsgChan   // message channel to communicate with game
+	MsgCh       GameMsgChan // message channel to communicate actions
+	CloseGameCh chan bool   // for communicating the closing of an existing game
+
 	eventHandler *EventHandler // handles game events
 
 	// --- metadata ---
 
 	ID    uuid.UUID // unique identifier for each game
 	Round int       // also represents "day"
+	Phase Phase
 
 	// players in this game instance
 	Players map[uuid.UUID]*PlayerState
+
+	// mutex
+	mu sync.Mutex
 }
 
 type GameMsgChan = chan string
@@ -33,6 +40,13 @@ type GameEvent struct {
 	Type EventType
 	Name string
 }
+
+type Phase string
+
+const (
+	Day      Phase = "Day"
+	Midnight Phase = "Midnight"
+)
 
 type EventType string
 
@@ -49,6 +63,32 @@ type Time struct {
 	Hour int
 }
 
+/**
+* Holds all primary information about a player.
+**/
+type PlayerState struct {
+	model.Player
+	// the stage the game match has reached for any player time Time
+	HeroInfo  Hero       // hero information
+	Party     []Follower // TODO: update to include followers
+	Inventory []Item     // global items
+	Gold      int
+	Time      Time // time the player has reached
+}
+
+type Hero struct {
+	class      HeroClass
+	attributes Attributes
+	skills     []Skill
+	items      []Item
+	stats      Stats
+}
+
+type Stats struct {
+	health    int // health for each fight
+	endurance int // total health for the entire night
+}
+
 type HeroClassName string
 
 const (
@@ -61,6 +101,8 @@ const (
 )
 
 type HeroClass struct {
+	name  HeroClassName
+	level int
 }
 
 type Attributes struct {
@@ -81,26 +123,6 @@ type Item struct {
 type Skill struct {
 	id   uuid.UUID
 	name string
-}
-
-/**
-* Holds all primary information about a player.
-**/
-type PlayerState struct {
-	model.Player
-	// the stage the game match has reached for any player time Time
-	HeroInfo  Hero       // hero information
-	Party     []Follower // TODO: update to include followers
-	Inventory []Item     // global items
-	Gold      int
-	Time      Time // time the player has reached
-}
-
-type Hero struct {
-	class      HeroClass  // mage
-	attributes Attributes //
-	skills     []Skill
-	items      []Item // items specifically meant for a hero
 }
 
 type Follower struct {
