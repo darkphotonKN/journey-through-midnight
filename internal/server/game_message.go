@@ -25,18 +25,34 @@ const (
 	init_match  Action = "init_match"
 	match_error Action = "match_error"
 
-	// --- event actions ---
+	// --- event actions ---\
+	event_choice Action = "event_choice"
 
 	// -- shop event --
 	buy_item   Action = "buy_item"
 	leave_shop Action = "leave_shop"
 )
 
+type GameEventAction struct {
+	GameID      uuid.UUID `json:"game_id"`
+	EventID     uuid.UUID `json:"event_id"`
+	EventChoice int       `json:"event_choice"`
+}
+
 /**
 * Provides conversion of the Payload based on the action type.
 **/
 func (gm *GameMessage) ParsePayload() error {
 	switch gm.Action {
+
+	case event_choice:
+
+		gameEventAction, ok := gm.Payload.(GameEventAction)
+		if !ok {
+			fmt.Println("Payload could not be asserted to a GameEventAction.")
+		}
+		gm.Payload = gameEventAction
+
 	case find_match:
 
 		payloadMap, ok := gm.Payload.(map[string]interface{})

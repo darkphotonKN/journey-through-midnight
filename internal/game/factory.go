@@ -30,6 +30,22 @@ type DefaultPlayerState struct {
 	defaultAttributes Attributes
 }
 
+type LLM struct {
+}
+
+func (l *LLM) GenerateText(prompt string) {
+
+	//
+}
+
+func NewLLM() *LLM {
+	return &LLM{}
+}
+
+func Main() {
+
+}
+
 func NewGameFactory(initialConditions InitialConditions) *GameFactory {
 
 	return &GameFactory{

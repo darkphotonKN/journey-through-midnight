@@ -36,7 +36,7 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 	// removes client and closes connection
 	defer func() {
 		fmt.Println("Connection closed due to end of function.")
-		s.removeClientOnline(conn)
+		s.cleanUpClient(conn)
 	}()
 
 	for {
@@ -212,7 +212,6 @@ func (s *Server) cleanUpClient(conn *websocket.Conn) {
 	s.mu.Lock()
 
 	defer s.mu.Unlock()
-
 	player, _ := s.findPlayerByConnection(conn)
 
 	// remove from their game

@@ -23,6 +23,9 @@ func (s *Server) MessageHub() {
 
 			fmt.Printf("------> Current client connections in session: %+v\n\n", s.playersOnline)
 
+			// TODO: Remove after debugging
+			fmt.Printf("\n------> Current games information session: %+v\n\n", s.games)
+
 			// deduce player from package
 			player, err := s.findPlayerByConnection(clientPackage.Conn)
 
@@ -81,9 +84,24 @@ func (s *Server) MessageHub() {
 
 				}
 
-			// cases accessible only after game started
-			// TODO: initialize game-specific channel for communication with
-			// the relavant game management goroutines
+			// individual game-specific actions
+			case event_choice:
+				gameEventAction := clientPackage.GameMessage.Payload.(GameEventAction)
+
+				// find corresponding game
+				currentGame, exists := s.games[gameEventAction.GameID]
+
+				if !exists {
+					// get the player's write-back game message channel
+					playerMsgChan, err := s.getGameMsgChan(clientPackage.Conn)
+
+					playerMsgChan <- GameMessage{Action: "error", Payload: struct {
+						Message string `json:"message"`
+					}{Message: err.Error()}}
+				}
+
+				// casting event choice to a string and sneding it to the original game
+				currentGame.MsgCh <- string(gameEventAction.EventChoice)
 
 			case buy_item:
 				fmt.Printf("Player %+v is attempting to buy an item.\n", clientPackage)
@@ -159,10 +177,22 @@ func (s *Server) MessageHub() {
 			go newGame.ManageGameLoop()
 
 		// TOOD: communicate events to an existing game loop
-		case eventChoice := <-s.serverChan:
+		// TODO: Need to move this to the serverChan send above
+		case message := <-s.serverChan:
+
+			err := message.GameMessage.ParsePayload()
+
+			if err != nil {
+				fmt.Printf("Error occured when attempting to parse payload: %s\n", err)
+				message.Conn.WriteJSON(fmt.Sprintf("Error attempting to parse payload: %s", err))
+				continue
+			}
+
+			// in this situation the action payload will contain the game id
+			message.GameMessage.Payload
 
 			// find game message channel
-			ch := s.games[uuid.New()].MsgCh
+			ch := s.games[3].MsgCh
 
 			ch <- eventChoice.GameMessage.Payload.(string)
 
