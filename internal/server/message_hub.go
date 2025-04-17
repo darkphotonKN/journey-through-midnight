@@ -188,13 +188,14 @@ func (s *Server) MessageHub() {
 				continue
 			}
 
+			// TODO: game communication
 			// in this situation the action payload will contain the game id
-			message.GameMessage.Payload
-
-			// find game message channel
-			ch := s.games[3].MsgCh
-
-			ch <- eventChoice.GameMessage.Payload.(string)
+			// message.GameMessage.Payload
+			//
+			// // find game message channel
+			// ch := s.games[3].MsgCh
+			//
+			// ch <- eventChoice.GameMessage.Payload.(string)
 
 		}
 	}
