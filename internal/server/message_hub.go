@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/game"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
@@ -100,8 +101,8 @@ func (s *Server) MessageHub() {
 					}{Message: err.Error()}}
 				}
 
-				// casting event choice to a string and sneding it to the original game
-				currentGame.MsgCh <- string(gameEventAction.EventChoice)
+				// casting event choice to a string and sending it to the original game
+				currentGame.MsgCh <- strconv.Itoa(gameEventAction.EventChoice)
 
 			case buy_item:
 				fmt.Printf("Player %+v is attempting to buy an item.\n", clientPackage)

@@ -1,12 +1,12 @@
 package server
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/game"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -20,46 +20,61 @@ var (
 
 type ServerTestSuite struct {
 	suite.Suite
-	server *Server
+
+	// setup test values to be shared across test functions
+	server    *Server
+	playerOne model.Player
+	playerTwo model.Player
 }
 
 func (s *ServerTestSuite) SetupTest() {
 	newServer := NewServer(testAddr)
-	s.server = newServer
-}
 
-func (s *ServerTestSuite) TestClientCleanUp() {
+	s.server = newServer
+
 	// setup dummy clients
-	playerOne := model.Player{
+	s.playerOne = model.Player{
 		ID:       uuid.New(),
 		UserName: "Player One",
 	}
 
-	playerTwo := model.Player{
+	s.playerTwo = model.Player{
 		ID:       uuid.New(),
 		UserName: "Player Two",
 	}
 
 	// setup dummy games
-	testGame := game.Game{
-		ID: uuid.New(),
-	}
+	factory := game.InitializeNewGameFactory()
 
 	// add dummy players to dummy game
+	var testPlayers []*model.Player
 
-	testGame.Players[playerOne.ID] = &game.PlayerState{
-		Player: playerOne,
-	}
+	testPlayers = append(testPlayers, &s.playerOne)
 
-	testGame.Players[playerTwo.ID] = &game.PlayerState{
-		Player: playerTwo,
-	}
+	testPlayers = append(testPlayers, &s.playerTwo)
 
-	s.server.games[testGame.ID] = &testGame
+	testGame := factory.CreateGame(testPlayers)
 
-	fmt.Printf("Game before client cleanup: \n%v\n\n", s.server.games[testGame.ID])
+	s.server.addGameToServer(testGame)
+}
 
-	fmt.Printf("Game after client cleanup: \n%v\n\n", s.server.games[testGame.ID])
+// test games can be successfully added
+func (s *ServerTestSuite) TestGameAddedToServer() {
+	assert.Equal(s.T(), 1, len(s.server.games))
+}
+
+// test games added players can be found in the games
+func (s *ServerTestSuite) TestPlayerFindable() {
+
+	game, err := s.server.findGameWithPlayer(s.playerOne.ID)
+	assert.NoError(s.T(), err)
+
+	// game must exist
+	assert.NotNil(s.T(), game)
+
+	// game with non-existant player should not exist
+	gameTwo, _ := s.server.findGameWithPlayer(uuid.New())
+	assert.Nil(s.T(), gameTwo)
 }
 
 func TestServer(t *testing.T) {

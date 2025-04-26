@@ -14,5 +14,5 @@ func (g *Game) RemovePlayer(id uuid.UUID) error {
 		return nil
 	}
 
-	return fmt.Errorf("Player with id %s does not exist in this game.")
+	return fmt.Errorf("Player with id %s does not exist in this game:", id)
 }
