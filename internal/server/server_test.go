@@ -21,7 +21,7 @@ var (
 type ServerTestSuite struct {
 	suite.Suite
 
-	// setup test values to be shared across test functions
+	// setup test values to be shared across test methods
 	server    *Server
 	playerOne model.Player
 	playerTwo model.Player

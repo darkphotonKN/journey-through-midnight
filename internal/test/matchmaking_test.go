@@ -4,72 +4,97 @@ import (
 	"testing"
 	"time"
 
+	"github.com/darkphotonKN/journey-through-midnight/internal/matchmaking"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
 	"github.com/darkphotonKN/journey-through-midnight/internal/server"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestMatchMaker_MatchMake(t *testing.T) {
-	// simulate game server and message hub
-	s := server.NewServer("7777")
-	go s.MessageHub()
+type MatchmakingTestSuite struct {
+	suite.Suite
 
-	matchMaker := s.GetMatchmaker()
+	// shared test values across test methods
+	matchmaker    matchmaking.MatchMaker
+	players       []*model.Player
+	matchWaitTime time.Duration
+}
+
+func (s *MatchmakingTestSuite) SetupTest() {
+	// simulate game server and message hub
+	serv := server.NewServer("7777")
+	go serv.MessageHub()
+
+	matchMaker := serv.GetMatchmaker()
 
 	matchWaitTime := time.Second * 1
-	matchMaker.StartMatchMaking(matchWaitTime) // overwrite original game wait time
+	s.matchWaitTime = matchWaitTime
+	matchMaker.StartMatchMaking(s.matchWaitTime) // overwrite original game wait time
 
 	playerOneUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111111")
 	playerTwoUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111112")
 	playerThreeUUID, _ := uuid.Parse("11111111-1111-1111-1111-111111111113")
 
 	// add three players to queue
-	playerOne := model.Player{
+	playerOne := &model.Player{
 		ID:       playerOneUUID,
 		UserName: "Player 1: John",
 	}
 
-	playerTwo := model.Player{
+	playerTwo := &model.Player{
 		ID:       playerTwoUUID,
 		UserName: "Player 2: Sandra",
 	}
 
-	playerThree := model.Player{
+	playerThree := &model.Player{
 		ID:       playerThreeUUID,
-		UserName: "Player 3: Bullock",
+		UserName: "Player 3: Person",
 	}
 
-	matchMaker.JoinMatchMaking(&playerOne)
-	matchMaker.JoinMatchMaking(&playerTwo)
-	matchMaker.JoinMatchMaking(&playerThree)
-	matchMaker.JoinMatchMaking(&playerThree)
+	s.players = make([]*model.Player, 0)
 
-	queue := matchMaker.GetQueueForTesting()
+	s.players = append(s.players, playerOne)
+	s.players = append(s.players, playerTwo)
+	s.players = append(s.players, playerThree)
+
+	s.matchmaker = matchMaker
+}
+
+func (s *MatchmakingTestSuite) TestQueue() {
+	s.matchmaker.JoinMatchMaking(s.players[0])
+	s.matchmaker.JoinMatchMaking(s.players[1])
+	s.matchmaker.JoinMatchMaking(s.players[2])
+
+	queue := s.matchmaker.GetQueueForTesting()
 
 	playerThreeCount := 0
 
 	for _, player := range queue {
 
-		if player.ID == playerThreeUUID {
+		if player.ID == s.players[2].ID {
 			playerThreeCount++
 		}
 	}
 
 	// make sure player 3 only appears once despite joining twice
-	assert.Equal(t, playerThreeCount, 1)
+	assert.Equal(s.T(), playerThreeCount, 1)
 
 	// test for length of initial queue
-	assert.Len(t, queue, 3)
+	assert.Len(s.T(), queue, 3)
 
 	// assert for only 1 player left after wait time
 	waitTimeOffset := time.Millisecond * 500
-	timer := time.NewTicker(matchWaitTime + waitTimeOffset)
+	timer := time.NewTicker(s.matchWaitTime + waitTimeOffset)
 
 	select {
 	case <-timer.C:
-		queue = matchMaker.GetQueueForTesting()
+		queue = s.matchmaker.GetQueueForTesting()
 
-		assert.Len(t, queue, 1)
+		assert.Len(s.T(), queue, 1)
 	}
+}
+
+func TestServer(t *testing.T) {
+	suite.Run(t, new(MatchmakingTestSuite))
 }
