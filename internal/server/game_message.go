@@ -65,15 +65,25 @@ func (gm *GameMessage) ParsePayload() error {
 
 		// Extract the "id" and "name" fields from the map
 		idStr, idOk := payloadMap["id"].(string)
-		name, nameOk := payloadMap["name"].(string)
+		username, nameOk := payloadMap["username"].(string)
 
-		if !idOk || !nameOk {
+		if !idOk && !nameOk {
 			fmt.Println("Error: The required fields 'id' or 'name' are not in the expected format.")
 			return fmt.Errorf("Error: The required fields 'id' or 'name' are not in the expected format.")
 		}
 
+		if !idOk {
+			fmt.Println("Error: The required field 'id' is not in the expected format.")
+			return fmt.Errorf("Error: The required field 'id' is not in the expected format.")
+		}
+
+		if !nameOk {
+			fmt.Println("Error: The required field 'name' is not in the expected format.")
+			return fmt.Errorf("Error: The required field 'name' is not in the expected format.")
+		}
+
 		fmt.Println("idStr:", idStr)
-		fmt.Println("name:", name)
+		fmt.Println("name:", username)
 
 		idUUID, err := uuid.Parse(idStr)
 
@@ -84,7 +94,7 @@ func (gm *GameMessage) ParsePayload() error {
 
 		convertedPlayer := model.PlayerRequest{
 			ID:       idUUID,
-			UserName: name,
+			UserName: username,
 		}
 
 		fmt.Printf("Converted player: %+v\n", convertedPlayer)

@@ -41,9 +41,10 @@ func NewMatchMaker(gameFactory game.GameFactory) MatchMaker {
 * Allows a player to join matchmaking.
 **/
 func (m *BaseMatchMaker) JoinMatchMaking(player *model.Player) error {
-
 	fmt.Printf("Player %s has queued for a game.\n", player.UserName)
 
+	// TODO: can also add a map with id as key that updates at the same time
+	// a user joins the queues to improve checking time complexity to O(1).
 	for _, playerInQueue := range m.queue {
 		if playerInQueue.ID == player.ID {
 			fmt.Println("Player with the same ID attempted to join.")
@@ -52,7 +53,6 @@ func (m *BaseMatchMaker) JoinMatchMaking(player *model.Player) error {
 		}
 	}
 
-	// adds player to queue
 	m.queue = append(m.queue, player)
 
 	return nil
@@ -64,6 +64,7 @@ func (m *BaseMatchMaker) GetNewGameChan() <-chan *game.Game {
 
 /**
 * StartMatchmaking intializes the observation of players in the queue in a goroutine.
+* This is currently started at the initialization of the game server.
 **/
 func (m *BaseMatchMaker) StartMatchMaking(interval time.Duration) {
 

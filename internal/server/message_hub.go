@@ -69,21 +69,32 @@ func (s *Server) MessageHub() {
 					Conn:     clientPackage.Conn,
 				})
 
-				// response error back to client
-				if err != nil {
-					// game client-specific channel
-					gameMsgChan, chanErr := s.getGameMsgChan(clientPackage.Conn)
-
-					if chanErr != nil {
-						fmt.Printf("Error when attempting to send message back to player: %s.", err)
-						continue
-					}
-
-					gameMsgChan <- GameMessage{Action: "error", Payload: struct {
-						Message string `json:"message"`
-					}{Message: err.Error()}}
-
+				// get game client-specific channel
+				gameMsgChan, chanErr := s.getGameMsgChan(clientPackage.Conn)
+				if chanErr != nil {
+					fmt.Printf("Error when attempting to send message back to player: %s.", err)
+					continue
 				}
+
+				// in case of error respond error back to client
+				if err != nil {
+					gameMsgChan <- GameMessage{
+						Action: match_error,
+						Payload: struct {
+							Message string `json:"message"`
+						}{
+							Message: err.Error(),
+						}}
+				}
+
+				// otherwise notify success
+				gameMsgChan <- GameMessage{
+					Action: find_match,
+					Payload: struct {
+						Message string `json:"message"`
+					}{
+						Message: fmt.Sprintf("The player \"%s\" has joined queue.", player.UserName),
+					}}
 
 			// individual game-specific actions
 			case event_choice:
@@ -149,9 +160,13 @@ func (s *Server) MessageHub() {
 						// get that player's channel
 						gameMsgChan := playerGameMsgChans[player.ID]
 
-						gameMsgChan <- GameMessage{Action: "error", Payload: struct {
-							Message string `json:"message"`
-						}{Message: err.Error()}}
+						gameMsgChan <- GameMessage{
+							Action: match_error,
+							Payload: struct {
+								Message string `json:"message"`
+							}{
+								Message: err.Error(),
+							}}
 					}
 
 				}
@@ -160,9 +175,13 @@ func (s *Server) MessageHub() {
 					// get that player's channel
 					gameMsgChan := playerGameMsgChans[player.ID]
 
-					gameMsgChan <- GameMessage{Action: "error", Payload: struct {
-						Message string `json:"message"`
-					}{Message: "Unknown error occured when attempting to start game."}}
+					gameMsgChan <- GameMessage{
+						Action: "error",
+						Payload: struct {
+							Message string `json:"message"`
+						}{
+							Message: "Unknown error occured when attempting to start game.",
+						}}
 				}
 			}
 
