@@ -46,6 +46,8 @@ func (s *Server) MessageHub() {
 				continue
 			}
 
+			fmt.Printf("\nparsed client package: %+v\n\n", clientPackage)
+
 			// -- serving messages based on action type --
 			switch clientPackage.GameMessage.Action {
 
@@ -207,27 +209,27 @@ func (s *Server) MessageHub() {
 
 			go newGame.ManageGameLoop()
 
-		// TOOD: communicate events to an existing game loop
-		// TODO: Need to move this to the serverChan send above
-		case message := <-s.serverChan:
-
-			err := message.GameMessage.ParsePayload()
-
-			if err != nil {
-				fmt.Printf("Error occured when attempting to parse payload: %s\n", err)
-				message.Conn.WriteJSON(fmt.Sprintf("Error attempting to parse payload: %s", err))
-				continue
-			}
-
-			// TODO: game communication
-			// in this situation the action payload will contain the game id
-			// message.GameMessage.Payload
+			// TOOD: communicate events to an existing game loop
+			// TODO: Need to move this to the serverChan send above
+			// case message := <-s.serverChan:
 			//
-			// // find game message channel
-			// ch := s.games[3].MsgCh
+			// 	err := message.GameMessage.ParsePayload()
 			//
-			// ch <- eventChoice.GameMessage.Payload.(string)
-
+			// 	if err != nil {
+			// 		fmt.Printf("Error occured when attempting to parse payload: %s\n", err)
+			// 		message.Conn.WriteJSON(fmt.Sprintf("Error attempting to parse payload: %s", err))
+			// 		continue
+			// 	}
+			//
+			// 	// TODO: game communication
+			// 	// in this situation the action payload will contain the game id
+			// 	// message.GameMessage.Payload
+			// 	//
+			// 	// // find game message channel
+			// 	// ch := s.games[3].MsgCh
+			// 	//
+			// 	// ch <- eventChoice.GameMessage.Payload.(string)
+			//
 		}
 	}
 }

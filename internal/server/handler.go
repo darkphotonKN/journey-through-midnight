@@ -60,9 +60,7 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 		if err != nil {
 			// Unexpected Error
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-
 				fmt.Printf("Abormal error occured with player %v. Closing connection.\n", targetPlayer)
-
 				break
 			}
 
@@ -76,6 +74,8 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 			fmt.Printf("General error occured during connection: %s\n", err)
 			break
 		}
+
+		fmt.Println("before decoding received message")
 
 		// --- Client Connection Handling ---
 		// Decodes Incoming client message and serves their unique connection its own goroutine
@@ -94,6 +94,8 @@ func (s *Server) ServeConnectedPlayer(conn *websocket.Conn) {
 		s.setupClientWriter(conn)
 
 		clientPackage := ClientPackage{GameMessage: decodedMsg, Conn: conn}
+
+		fmt.Println("Sending clientPackage to message hub.")
 
 		// Send message to MessageHub via an *unbuffered channel* for handling based on the type field.
 		s.serverChan <- clientPackage
