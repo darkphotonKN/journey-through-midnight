@@ -138,24 +138,22 @@ func (s *Server) MessageHub() {
 			// the respective players
 			err := s.addGameToServer(newGame)
 
-			if err != nil {
-				// get each game client-specific channel and send them the error
-				playerGameMsgChans := make(map[uuid.UUID]chan GameMessage)
+			// grab player-respective game channels
+			playerGameMsgChans := make(map[uuid.UUID]chan GameMessage)
+			for _, player := range newGame.Players {
+				gameMsgChan, chanErr := s.getGameMsgChan(player.Conn)
 
-				for _, player := range newGame.Players {
-					gameMsgChan, chanErr := s.getGameMsgChan(player.Conn)
-
-					// skip non-existant channels
-					if chanErr != nil {
-						continue
-					}
-
-					playerGameMsgChans[player.ID] = gameMsgChan
+				// skip non-existant channels
+				if chanErr != nil {
+					continue
 				}
 
-				if err == game.ErrGameExists {
-					// broadcast to each player the error
+				playerGameMsgChans[player.ID] = gameMsgChan
+			}
 
+			if err != nil {
+				// broadcast to each player the error
+				if err == game.ErrGameExists {
 					for _, player := range newGame.Players {
 						// get that player's channel
 						gameMsgChan := playerGameMsgChans[player.ID]
@@ -168,9 +166,9 @@ func (s *Server) MessageHub() {
 								Message: err.Error(),
 							}}
 					}
-
 				}
 
+				// unknown error
 				for _, player := range newGame.Players {
 					// get that player's channel
 					gameMsgChan := playerGameMsgChans[player.ID]
@@ -183,6 +181,19 @@ func (s *Server) MessageHub() {
 							Message: "Unknown error occured when attempting to start game.",
 						}}
 				}
+			}
+
+			// send game found succuess notification
+			for _, player := range newGame.Players {
+				gameMsgChan := playerGameMsgChans[player.ID]
+
+				gameMsgChan <- GameMessage{
+					Action: init_match,
+					Payload: struct {
+						Message string `json:"message"`
+					}{
+						Message: "You have found a match.",
+					}}
 			}
 
 			// -- start game management goroutine --

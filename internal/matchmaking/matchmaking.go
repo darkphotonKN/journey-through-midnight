@@ -91,9 +91,11 @@ func (m *BaseMatchMaker) StartMatchMaking(interval time.Duration) {
 func (m *BaseMatchMaker) matchMake() {
 	// NOTE: only debug logging
 	var playersInQueue []model.Player
+
 	for _, player := range m.queue {
 		playersInQueue = append(playersInQueue, *player)
 	}
+
 	fmt.Printf("\nInitial queue: %+v\n\n", playersInQueue)
 	// NOTE: debug logging end
 
