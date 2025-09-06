@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -44,6 +45,8 @@ func (h *EventHandler) initiateEvent(eventType EventType, playerState *PlayerSta
 	rng := rand.New(source)
 	randomIndex := rng.Intn(len(h.events))
 	randomEvent := h.events[randomIndex]
+	// TODO: remove after testing
+	fmt.Println("randomEvent:", randomEvent)
 }
 
 /**
