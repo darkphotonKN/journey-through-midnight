@@ -1,9 +1,22 @@
 package game
 
+import (
+	"math/rand"
+	"time"
+)
+
+type Event string
+
+const (
+	eventStory Event = "storyEvent"
+	eventShop  Event = "shopEvent"
+)
+
 /**
 * Event handler processes events and their outcome.
 **/
 type EventHandler struct {
+	events []Event
 }
 
 func NewEventHandler() *EventHandler {
@@ -11,7 +24,7 @@ func NewEventHandler() *EventHandler {
 }
 
 const (
-	defaultEventHours = 1
+	defaultEventHours = 1 // default increment of time when an event occurs
 )
 
 /**
@@ -26,6 +39,37 @@ func (h *EventHandler) initiateEvent(eventType EventType, playerState *PlayerSta
 		Hour: playerState.Time.Hour + defaultEventHours,
 	}
 
+	// choose a random event
+	source := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(source)
+	randomIndex := rng.Intn(len(h.events))
+	randomEvent := h.events[randomIndex]
+}
+
+/**
+* Story Event
+* This allows the player to pick choices based on the story and has a chance to result
+* in earning an item or upgrade.
+**/
+type StoryEvent string
+
+const (
+	StoryEventPureStory StoryEvent = "pureStory"
+	StoryEventEarnXP    StoryEvent = "earnXP"
+	StoryEventEarnItem  StoryEvent = "earnItem"
+)
+
+var storyEvents = []StoryEvent{StoryEventPureStory, StoryEventEarnXP, StoryEventEarnItem}
+
+func (h *EventHandler) runStoryEvent() StoryEvent {
+	// choose a random event
+	source := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(source)
+	randomIndex := rng.Intn(len(storyEvents))
+	selectedEvent := storyEvents[randomIndex]
+
+	// selectedEvent now contains the randomly chosen story event
+	return selectedEvent
 }
 
 /**

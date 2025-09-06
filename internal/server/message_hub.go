@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/game"
 	"github.com/darkphotonKN/journey-through-midnight/internal/model"
@@ -113,8 +112,17 @@ func (s *Server) MessageHub() {
 					}{Message: err.Error()}}
 				}
 
-				// casting event choice to a string and sending it to the original game
-				currentGame.MsgCh <- strconv.Itoa(gameEventAction.EventChoice)
+				// casting event choice to a string and sending it to the corresponding game
+
+				fmt.Printf("sending game event action from player:")
+
+				currentGame.MsgCh <- struct {
+					action   GameEventAction
+					playerID uuid.UUID
+				}{
+					action:   gameEventAction,
+					playerID: player.ID,
+				}
 
 			case buy_item:
 				fmt.Printf("Player %+v is attempting to buy an item.\n", clientPackage)
@@ -130,7 +138,8 @@ func (s *Server) MessageHub() {
 		// --- handling new game initializations ---
 		case newGame := <-s.matchMaker.GetNewGameChan():
 
-			fmt.Printf("\nNew game was started. Game Info\n\n%+v\n\nplayers:\n", newGame)
+			fmt.Printf("\nNew game was started and received in the Message Hub. \nGame Info\n\n")
+
 			for _, player := range newGame.Players {
 				fmt.Printf("\nPlayer: %s\n", player.UserName)
 			}
@@ -184,7 +193,7 @@ func (s *Server) MessageHub() {
 				}
 			}
 
-			// send game found succuess notification
+			// send game found success notification
 			for _, player := range newGame.Players {
 				gameMsgChan := playerGameMsgChans[player.ID]
 
@@ -207,28 +216,6 @@ func (s *Server) MessageHub() {
 			//                  Write Goroutines <----     |
 
 			go newGame.ManageGameLoop()
-
-			// TOOD: communicate events to an existing game loop
-			// TODO: Need to move this to the serverChan send above
-			// case message := <-s.serverChan:
-			//
-			// 	err := message.GameMessage.ParsePayload()
-			//
-			// 	if err != nil {
-			// 		fmt.Printf("Error occured when attempting to parse payload: %s\n", err)
-			// 		message.Conn.WriteJSON(fmt.Sprintf("Error attempting to parse payload: %s", err))
-			// 		continue
-			// 	}
-			//
-			// 	// TODO: game communication
-			// 	// in this situation the action payload will contain the game id
-			// 	// message.GameMessage.Payload
-			// 	//
-			// 	// // find game message channel
-			// 	// ch := s.games[3].MsgCh
-			// 	//
-			// 	// ch <- eventChoice.GameMessage.Payload.(string)
-			//
 		}
 	}
 }

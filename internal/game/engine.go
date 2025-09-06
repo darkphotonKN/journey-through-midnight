@@ -10,7 +10,7 @@ import (
 * the logic, events, turns, etc.
 *
 * The primary game cycle focuses on 4 "phases".
-* Phase 1 Turn start - handles what each player gets at the beginning of each turn, and the initial event they are
+* Phase 1 Turn start - handles what each player gets at the beginning of each turn, and the initial event they
 * are thrown into. This is sent automatically at the start of the game and at the start of each round.
 * Phase 2 Daytime Events - Each player interfaces with an event per "time interval" during the day, until
 * they reach the midnight phase.
@@ -101,4 +101,18 @@ func (g *Game) ManageGameLoop() {
 			return
 		}
 	}
+}
+
+/**
+* Management of incoming player messages to the specific game instance.
+**/
+func (g *Game) InitiateGameMessageHub() {
+	go func() {
+		for {
+			select {
+			case gameMsg := <-g.MsgCh:
+				fmt.Printf("\nRecieved msg inside ongoing game: %+v\n\n", gameMsg)
+			}
+		}
+	}()
 }

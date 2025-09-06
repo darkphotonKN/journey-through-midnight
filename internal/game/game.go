@@ -19,7 +19,7 @@ type Game struct {
 	// --- metadata ---
 
 	ID    uuid.UUID // unique identifier for each game
-	Round int       // also represents "day"
+	Round int       // NOTE: "Round" also represents the "day" of the game
 	Phase Phase
 
 	// players in this game instance
@@ -29,7 +29,7 @@ type Game struct {
 	mu sync.Mutex
 }
 
-type GameMsgChan = chan string
+type GameMsgChan = chan interface{}
 
 /**
 * Responsible for Game Events.
@@ -54,7 +54,7 @@ const (
 	Fight          EventType = "fight"
 	PlayerOpponent EventType = "player_opponent"
 	FoundItem      EventType = "found_item"
-	Encounter      EventType = "encounter" // details TBD
+	Encounter      EventType = "encounter"
 	Shop           EventType = "shop"
 )
 

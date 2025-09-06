@@ -68,15 +68,21 @@ func (f *GameFactory) CreateGame(players []*model.Player) *Game {
 
 	eventHandler := NewEventHandler()
 
-	return &Game{
+	// creates new game instance
+	newGame := &Game{
 		ID:      uuid.New(),
-		MsgCh:   make(chan string),
+		MsgCh:   make(chan interface{}),
 		Round:   f.defaultRound,
 		Players: playerStates,
 
 		// inject eventHandler
 		eventHandler: eventHandler,
 	}
+
+	// initializes game-specific communication goroutine
+	newGame.InitiateGameMessageHub()
+
+	return newGame
 }
 
 const (
