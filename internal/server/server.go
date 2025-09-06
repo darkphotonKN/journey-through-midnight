@@ -34,7 +34,7 @@ type Server struct {
 	// player connection to UUID mapping
 	connToPlayerID map[*websocket.Conn]uuid.UUID
 
-	// all current game connections
+	// all current on-going game connections
 	games map[uuid.UUID]*game.Game
 
 	// stores unique ws connections for writing back to each client

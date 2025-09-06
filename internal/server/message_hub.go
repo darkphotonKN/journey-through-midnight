@@ -17,7 +17,6 @@ func (s *Server) MessageHub() {
 
 	for {
 		select {
-
 		// --- handling messages sent from server over serverChan ---
 		case clientPackage := <-s.serverChan:
 			fmt.Printf("Client Package received: %+v\n\n", clientPackage)
