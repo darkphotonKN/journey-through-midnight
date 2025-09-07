@@ -106,10 +106,15 @@ func (s *Server) MessageHub() {
 				if !exists {
 					// get the player's write-back game message channel
 					playerMsgChan, err := s.getGameMsgChan(clientPackage.Conn)
+					fmt.Printf("\nplayerMsgChan: %+v\n\n", playerMsgChan)
 
-					playerMsgChan <- GameMessage{Action: "error", Payload: struct {
-						Message string `json:"message"`
-					}{Message: err.Error()}}
+					playerMsgChan <- GameMessage{
+						Action: "error",
+						Payload: struct {
+							Message string `json:"message"`
+						}{
+							Message: err.Error(),
+						}}
 				}
 
 				// casting event choice to a string and sending it to the corresponding game

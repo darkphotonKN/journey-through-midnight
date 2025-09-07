@@ -63,17 +63,14 @@ func (g *Game) ProcessPlayerMidnightEvent(game *Game, event GameEvent) {
 * Manages each unique game and it's coordinations.
 **/
 func (g *Game) ManageGameLoop() {
-	serverTick := time.Second // one second per game "tick"
+	serverTick := time.Second * 3 // three seconds per game "tick"
 	ticker := time.NewTicker(serverTick)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
-			g.mu.Lock()
-
 			fmt.Printf("\ngameId: %v\n\n", g.ID)
-			defer g.mu.Unlock()
 
 			fmt.Printf("game %s currently on round: %d.\n", g.ID, g.Round)
 
@@ -81,6 +78,7 @@ func (g *Game) ManageGameLoop() {
 			playersAtMidnight := 0
 			playersEndOfRound := 0
 
+			g.mu.Lock()
 			for _, player := range g.Players {
 				if player.Time.Hour == 24 {
 					playersAtMidnight++
@@ -92,9 +90,10 @@ func (g *Game) ManageGameLoop() {
 
 			// process game transition to midnight
 			if playersAtMidnight == len(g.Players) {
-
 			}
+			g.mu.Unlock()
 
+		// handle all incoming game messages from players to this specific game
 		case gameMsg := <-g.MsgCh:
 			fmt.Printf("\nRecieved msg inside ongoing game: %+v\n\n", gameMsg)
 

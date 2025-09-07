@@ -46,12 +46,48 @@ func (gm *GameMessage) ParsePayload() error {
 	switch gm.Action {
 
 	case event_choice:
+		payloadMap, ok := gm.Payload.(map[string]interface{})
 
-		gameEventAction, ok := gm.Payload.(GameEventAction)
 		if !ok {
-			fmt.Println("Payload could not be asserted to a GameEventAction.")
+			fmt.Println("Could not be parsed into a map.")
+			return fmt.Errorf("Could not be parsed into a map.")
 		}
-		gm.Payload = gameEventAction
+
+		// custom conversion of incoming game data
+		// Extract and convert each field
+		gameIDStr, ok := payloadMap["game_id"].(string)
+		if !ok {
+			return fmt.Errorf("game_id is not a string")
+		}
+
+		eventIDStr, ok := payloadMap["event_id"].(string)
+		if !ok {
+			return fmt.Errorf("event_id is not a string")
+		}
+
+		eventChoice, ok := payloadMap["event_choice"].(float64)
+		if !ok {
+			return fmt.Errorf("event_choice is not a number")
+		}
+
+		// Parse UUIDs
+		gameID, err := uuid.Parse(gameIDStr)
+		if err != nil {
+			return fmt.Errorf("invalid game_id: %v", err)
+		}
+
+		eventID, err := uuid.Parse(eventIDStr)
+		if err != nil {
+			return fmt.Errorf("invalid event_id: %v", err)
+		}
+
+		parsedGameEventAction := GameEventAction{
+			GameID:      gameID,
+			EventID:     eventID,
+			EventChoice: int(eventChoice),
+		}
+
+		gm.Payload = parsedGameEventAction
 
 	case find_match:
 
