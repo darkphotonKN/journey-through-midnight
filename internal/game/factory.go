@@ -79,9 +79,6 @@ func (f *GameFactory) CreateGame(players []*model.Player) *Game {
 		eventHandler: eventHandler,
 	}
 
-	// initializes game-specific communication goroutine
-	newGame.InitiateGameMessageHub()
-
 	return newGame
 }
 

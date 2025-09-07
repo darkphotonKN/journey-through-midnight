@@ -95,24 +95,13 @@ func (g *Game) ManageGameLoop() {
 
 			}
 
+		case gameMsg := <-g.MsgCh:
+			fmt.Printf("\nRecieved msg inside ongoing game: %+v\n\n", gameMsg)
+
 			// stop this goroutine, game ended or errored
 		case <-g.CloseGameCh:
 			fmt.Println("Game has been stopped or already stopped prior, exiting ManageGameLoop goroutine.")
 			return
 		}
 	}
-}
-
-/**
-* Management of incoming player messages to the specific game instance.
-**/
-func (g *Game) InitiateGameMessageHub() {
-	go func() {
-		for {
-			select {
-			case gameMsg := <-g.MsgCh:
-				fmt.Printf("\nRecieved msg inside ongoing game: %+v\n\n", gameMsg)
-			}
-		}
-	}()
 }

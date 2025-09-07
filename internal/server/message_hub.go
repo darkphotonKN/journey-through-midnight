@@ -116,6 +116,7 @@ func (s *Server) MessageHub() {
 
 				fmt.Printf("sending game event action from player:")
 
+				// TODO: abstract type
 				currentGame.MsgCh <- struct {
 					action   GameEventAction
 					playerID uuid.UUID
