@@ -48,6 +48,8 @@ func (gm *GameMessage) ParsePayload() error {
 	case event_choice:
 		payloadMap, ok := gm.Payload.(map[string]interface{})
 
+		fmt.Printf("\npayloadMap: %+v\n\n", payloadMap)
+
 		if !ok {
 			fmt.Println("Could not be parsed into a map.")
 			return fmt.Errorf("Could not be parsed into a map.")

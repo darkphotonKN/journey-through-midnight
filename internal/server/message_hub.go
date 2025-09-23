@@ -106,22 +106,34 @@ func (s *Server) MessageHub() {
 				if !exists {
 					// get the player's write-back game message channel
 					playerMsgChan, err := s.getGameMsgChan(clientPackage.Conn)
-					fmt.Printf("\nplayerMsgChan: %+v\n\n", playerMsgChan)
+
+					if err != nil {
+						playerMsgChan <- GameMessage{
+							Action: "error",
+							Payload: struct {
+								Message string `json:"message"`
+							}{
+								Message: err.Error(),
+							}}
+
+						return
+					}
 
 					playerMsgChan <- GameMessage{
 						Action: "error",
 						Payload: struct {
 							Message string `json:"message"`
 						}{
-							Message: err.Error(),
+							Message: fmt.Sprintf("\nError when attempting to look up an existing game with the id: %s\n\n", gameEventAction.GameID),
 						}}
+					return
 				}
 
 				// casting event choice to a string and sending it to the corresponding game
 
 				fmt.Printf("sending game event action from player:")
 
-				// TODO: abstract type
+				// TODO: create a concrete type
 				currentGame.MsgCh <- struct {
 					action   GameEventAction
 					playerID uuid.UUID
