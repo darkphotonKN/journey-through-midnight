@@ -56,6 +56,28 @@ The server keeps track of:
 - **PostgreSQL** with sqlx (database connection is initialized but not actively used yet)
 - **UUID** for unique identifiers
 
+## Database Migrations
+This project uses [golang-migrate](https://github.com/golang-migrate/migrate) for database migrations.
+
+### Running Migrations
+```bash
+# Run all up migrations
+migrate -path migrations -database "postgres://username:password@localhost:5432/dbname?sslmode=disable" up
+
+# Rollback one migration
+migrate -path migrations -database "postgres://username:password@localhost:5432/dbname?sslmode=disable" down 1
+
+# Force to a specific version (use with caution)
+migrate -path migrations -database "postgres://username:password@localhost:5432/dbname?sslmode=disable" force VERSION
+```
+
+### Creating New Migrations
+```bash
+migrate create -ext sql -dir migrations -seq migration_name
+```
+
+This will create both `.up.sql` and `.down.sql` files in the migrations folder.
+
 ## Running the Server
 Make sure you have a `.env` file with your `PORT` defined, then just run:
 ```bash

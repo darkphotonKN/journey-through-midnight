@@ -27,25 +27,32 @@ test-game-preview:
 	@go test ./internal/game/ --cover -coverprofile=coverage.out 
 	@go tool cover -html=coverage.out
 
-# Migration commands using Goose
+# Migration commands using golang-migrate
 migrate-up:
-	@goose -dir ./migrations postgres "$(DB_STRING)" up
+	@migrate -path migrations -database "$(DB_STRING)" up
 
 migrate-down:
-	@goose -dir ./migrations postgres "$(DB_STRING)" down
+	@migrate -path migrations -database "$(DB_STRING)" down 1
+
+migrate-down-all:
+	@migrate -path migrations -database "$(DB_STRING)" down
 
 migrate-status:
-	@goose -dir ./migrations postgres "$(DB_STRING)" status
+	@migrate -path migrations -database "$(DB_STRING)" version
 
-migrate-down-to:
+migrate-force:
 	@if [ -z "$(VERSION)" ]; then \
-		echo "Usage: make migrate-down-to VERSION=<version>"; \
+		echo "Usage: make migrate-force VERSION=<version>"; \
 		exit 1; \
 	fi; \
-	goose -dir ./migrations postgres "$(DB_STRING)" down-to $(VERSION)
+	migrate -path migrations -database "$(DB_STRING)" force $(VERSION)
 
-migrate-reset:
-	@goose -dir ./migrations postgres "$(DB_STRING)" reset
+migrate-create:
+	@if [ -z "$(NAME)" ]; then \
+		echo "Usage: make migrate-create NAME=<migration_name>"; \
+		exit 1; \
+	fi; \
+	migrate create -ext sql -dir migrations -seq $(NAME)
 
 .PHONY: run test migrate-up migrate-down migrate-status
 
