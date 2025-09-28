@@ -13,7 +13,7 @@ type service struct {
 
 type Repository interface {
 	Create(request SignUpRequest) (*User, error)
-	GetByUsername(username string) (*User, error)
+	GetByEmail(email string) (*User, error)
 	GetById(userId uuid.UUID) (*User, error)
 	GetProfile(userId uuid.UUID) (*PlayerProfile, error)
 }
@@ -41,13 +41,14 @@ func (s *service) SignUp(request SignUpRequest) error {
 }
 
 func (s *service) SignIn(request SignInRequest) (*AuthResponse, error) {
-	user, err := s.repo.GetByUsername(request.Username)
+	user, err := s.repo.GetByEmail(request.Email)
 	if err != nil {
-		return nil, fmt.Errorf("invalid credentials")
+		return nil, fmt.Errorf("could not get user")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(request.Password))
 	if err != nil {
+		fmt.Println("")
 		return nil, fmt.Errorf("invalid credentials")
 	}
 

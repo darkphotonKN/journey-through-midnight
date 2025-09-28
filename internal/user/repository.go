@@ -89,6 +89,23 @@ func (r *repository) GetById(userId uuid.UUID) (*User, error) {
 	return &user, nil
 }
 
+func (r *repository) GetByEmail(email string) (*User, error) {
+	var user User
+	query := `
+		SELECT u.id, u.email, u.password_hash, u.email_verified, u.is_active, u.created_at, u.updated_at
+		FROM users u
+		WHERE u.email = $1
+	`
+	err := r.db.Get(&user, query, email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("failed to get user by email: %w", err)
+	}
+	return &user, nil
+}
+
 func (r *repository) GetProfile(userId uuid.UUID) (*PlayerProfile, error) {
 	var profile PlayerProfile
 	query := `
