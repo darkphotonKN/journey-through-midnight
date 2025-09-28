@@ -36,3 +36,13 @@ type SignInRequest struct {
 	Username string `db:"username" json:"username"`
 	Password string `db:"password" json:"password"`
 }
+
+type AuthResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	User         *User  `json:"user"`
+}
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}

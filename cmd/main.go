@@ -27,7 +27,7 @@ func main() {
 	go server.MessageHub()
 
 	// routes setup
-	routes := config.SetupRoutes(server)
+	routes := config.SetupRoutes(server, db)
 
 	fmt.Printf("Server listening on port %s.\n", port)
 

@@ -4,11 +4,13 @@ import (
 	"fmt"
 
 	"github.com/darkphotonKN/journey-through-midnight/internal/server"
+	"github.com/darkphotonKN/journey-through-midnight/internal/user"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 )
 
-func SetupRoutes(server *server.Server) *gin.Engine {
+func SetupRoutes(server *server.Server, db *sqlx.DB) *gin.Engine {
 	router := gin.Default()
 
 	// NOTE: debugging middleware
@@ -33,8 +35,23 @@ func SetupRoutes(server *server.Server) *gin.Engine {
 
 	router.GET("/ws", server.HandleMatchConn)
 
+	userRepo := user.NewRepository(db)
+	userService := user.NewService(userRepo)
+	userHandler := user.NewHandler(userService)
+
 	api := router.Group("/api")
-	api.POST("/signup", server.HandleMatchConn)
+
+	// public
+	userRoutes := api.Group("/user")
+	userRoutes.POST("/signup", userHandler.SignUp)
+	userRoutes.POST("/signin", userHandler.SignIn)
+	userRoutes.POST("/refresh", userHandler.RefreshToken)
+
+	// protected
+	userRoutes.Use(user.AuthMiddleware())
+	{
+		userRoutes.GET("/profile", userHandler.GetProfile)
+	}
 
 	return router
 }
